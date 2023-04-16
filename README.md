@@ -263,3 +263,194 @@ public class Test1 extends Test implements A{
 
 **由此可以看出，一个类的父类和接口都有一个方法，并且父类已经实现该方法，则该类的对象优先使用父类的实现方法。（类大于接口）**
 
+## 枚举
+
+```java
+public class Main {//main
+    public static void main(String[] args) {
+        Students s=new Students();
+        s.setStatus(Status.running);
+        System.out.println(s.getStatus());
+    }
+}
+
+public class Students{//学生类
+        private Status status;//封装
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+}
+
+public enum Status {//枚举类
+    running,study,sleep;//枚举类可以设置多个状态
+    //在main类里调用setStatus方法时可以直接选择已经设定好的状态，不用再去输入。
+}
+
+```
+
+## 基本类型包装类
+
+int->Integer
+
+short->Short
+
+byte->Byte
+
+long->Long
+
+float->Float
+
+double->Double
+
+char->Character
+
+boolean->Boolean
+
+**包装类就是将基本数据类型封装成一个类**
+
+```java
+public class Main{
+    public static void main(String[] args){
+        Integer i=new Integer(10);//Integer类
+        //i=10 作为对象的一个int
+    }
+}
+/*Integer的类里面有 public Integer(int value){
+		this.value=value;
+}*/所以可当做对象去使用
+```
+
+**包装类型支持自动封装**
+
+所以我们可以直接将一个对应的基本类型值作为对应包装类型应用变量的值（简单来说就不用再去new 一个对象了）
+
+```java
+public static void main(String[] args){
+    Integer i=10;//将int类型值作为包装类型使用
+    /*
+    自动装箱实际上隐式调用了 Integer i=Integer.valueOf（10);
+   	其中Integer.valueOf(10)直接简化成了10
+    */
+    
+}
+```
+
+**自动拆箱**
+
+将一个对象类型变成了对应的普通基本类型
+
+```java
+public static void main(String[]args){
+    Integer i=10
+    int a=i;
+    //a=10
+    /*
+    自动拆箱实际上调用了
+    int a=i.intValue();这个方法
+    
+    public int intValue(){
+    	return value;
+    }该方法在Integer类里面
+    */
+}
+```
+
+有了这种自动装箱和拆箱的机制，才可以让包装类型轻松的参与到基本类型的运算。
+
+```java
+public static void main(String[]args){
+    //用自动装箱 在 -128的127 的值都相同
+    Integer a=10;
+    Integer b=10;
+    //(a==b) true;
+    Integer c=128;
+    Integer d=128;
+    //(c==d) false;
+}
+```
+
+（以上同理其他基本数据类型）
+
+### 数据类型转换
+
+```java
+public static void main(String[args]){
+    String s="10";
+    Integer i=new Integer(s);//快速将string转换为int
+    //i=10;
+    /*
+    Integer i= Integer.parseInt(s);
+    Integer i=Integer.valueOf(s);
+    效果相同
+    */
+
+	Integer a=Integer.decode("0xAA");//16进制
+    //a=170;
+}
+
+
+```
+
+### 特殊包装类
+
+用于计算超大类型数字的BigInteger（没有限制）
+
+但只能调用方法来进行计算
+
+```java
+public static void main(String[]args){
+    BigInteger i=BigInteger.valueOf(100);
+    BigInteger a=i.multiply(BigInteger.TEN);//乘以10
+    //add(加)，divide（除）pow（次方）
+    /*
+   	这里乘以10 得出来的是新的对象，必须要一个新的对象来存
+    */
+}
+```
+
+BigDecimal 可以小数的精确计算
+
+用法与BigInteger相似
+
+```java
+BigDecimal i=BigDecimal.valueOf(10);
+i=i.divide(BigDecimal.valueOf(3),100,RoundingMod.CEILING) //10除以3 ，精确到小数点100位 向上取整
+```
+
+
+
+## 数组
+
+**数组本身也是一个类，继承于Object**
+
+普通数组不支持装箱和拆箱
+
+### 一维数组
+
+int a=10;
+
+int[] a ={...};
+
+```java
+public static void main(String[]args){
+    int[] a =new int[10];//长度为10的数组
+    int [] b=new int[]{1,2,3,4};//静态初始化
+    //int[] b={1,2,3,4};
+    int cl=b.clone();
+    cl={1,2,3,4};
+    /*
+    与c不同的是有String
+    类型数组
+    */
+    String[] c=new String[10];
+    c[0]="hello ,world";
+}
+```
+
+### 多维数组
+
