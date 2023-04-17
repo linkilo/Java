@@ -71,7 +71,7 @@ public class person {
 
 ## 继承
 
-```
+```java
 public class person {
 public person(String name, int age, String sex) {
         this.name = name;
@@ -545,7 +545,7 @@ public static void main(String[]args){
         s.
         append("111");
     	append("222");//链式操作
-    ...待补充
+    //待补充
 }
 ```
 
@@ -655,7 +655,7 @@ public class Students{
 
 ### 匿名内部类
 
-（使用评率高）
+（使用率高）
 
 ```java
 public class Test {
@@ -689,7 +689,182 @@ public class Main {
 内部类初始化
 我是静态内部类
 
-在这个过程值=只初始化了静态内部类
+在这个过程值只初始化了静态内部类
+因为不管是什么类，系统都给每个类生成了一个class文件独立存放
+执行时只会执行需要用的类
 */
 ```
+
+**匿名内部类是局部内部类的简化版**
+
+```java
+public  abstract class Students{//抽象类
+        public abstract void test();//抽象方法
+    }
+
+
+public class Main {
+    public static void main(String[] args) {
+        //正常情况下，要创建一个抽象类的实例对象，只能通过继承的方式，来实现方法，然后再创建实例对象
+            Students s =new Students(){
+                //在new的时候 直接将方法实现
+                @Override
+                public void test(){
+					System.out.println("我是匿名内部类");
+                }
+            };//这样写就是匿名内部类，就可以不用再去继承
+        s.test();
+        /*
+        这里的s对象，就是一个已经实现了抽象方法的对象
+        而这个抽象类就已经定义好了，没有名字就可以创建出对象
+        */
+    }
+
+}
+```
+
+**同样的接口也可以通过这种匿名内部类的形式，直接创建一个匿名的接口实现类。**
+
+```java
+public class Main {
+    public static void main(String[] args) {
+            Students s =new Students(){//在new的时候 直接将方法实现
+                @Override
+                public void test() {
+                    System.out.println("我是匿名内部类"+name);
+                }
+            };//匿名内部类
+        s.test();
+        Study s1=new Study(){
+          @Override
+          public void study(){
+              System.out.println("我是匿名接口类");
+          }
+        };
+        s1.study();
+    }
+
+}
+public interface Study {//Study接口
+    void study();//抽象方法
+}
+ public  abstract class Students{//抽象类
+        protected String name;
+        public abstract void test();//抽象方法
+    }
+```
+
+普通类，抽象类，接口都可以创建匿名内部类。
+
+### Lambda表达式
+
+**Lambda表达式只支持接口**
+
+通过匿名内部类，我们可以创建一个临时的实现子类
+
+如果一个接口中有且只有一个待实现的抽象方法，那么我吗可以将匿名内部类简写成Lambda表达式：
+
+```java
+public interface Study {
+    void study(int a);
+}
+
+
+public class Main {
+    public static void main(String[] args) {
+        Study s=new Study() {//匿名内部类
+            @Override
+            public void study(int a) {
+                System.out.println("hello");
+            }
+        };
+        Study s1= (int a) -> System.out.println("hello");
+        //Lambda 表达式
+        
+        Study s2=(int a) -> {
+            System.out.println("hello");
+            System.out.println("world");
+        }
+        
+        /*
+        public interface Study {
+    		String study(int a);
+		}
+        如果实现的方法力只需要return 一个值
+        Study s=(int a)->{
+   			return "hello";
+        }
+        那可以简写为：
+		Study s = a->"hello";
+        */
+    }
+}
+
+```
+
+### 方法引用
+
+**方法引用就是讲一个已经实现的方法直接作为接口中抽象方法的实现**
+
+**任何方法都可以通过方法引用作为实现**
+
+实现格式： 对象+“::”+方法名
+
+```java
+public interface A {
+    int sum(int a,int b);
+}
+
+public class Main {
+    public static void main(String[] args) {
+        A s= (a,b)-> a+b;
+        //接口的求和方法
+        A s1=(a,b)->Integer.sum(a,b);
+        //Integer的求和方法
+        A s2=Integer::sum;
+        //引用Integer的求和方法
+        System.out.println(s.sum(10,20));
+        System.out.println(s1.sum(10,20));
+        System.out.println(s2.sum(10,20));
+    }
+}
+
+    /*
+    Integer中已经存在了一个求和方法，且定义和返回类型和 A接口中的一样，，那么就可以直接将该方法作为接口中抽象方法的实现
+    */
+}
+```
+
+```java
+public interface Study {//Study接口
+    String study();
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Main m=new Main();
+        /*
+        要使用test方法必须先创建一个Main类的对象CIA能使用Main类的方法
+        */
+        Study s=m::test;
+        /*
+        通过 Main类里的 test方法来作为 Study接口抽象方法的实现
+        */
+        System.out.println(s.study());
+    }
+    public String test(){//成员方法
+        return "kilo";
+    }
+}
+//执行结果：kilo
+
+```
+
+## 异常机制
+
+异常类型：
+
+1：运行时异常（继承于：RuntimeExceptiomn）
+
+2：编译时异常(继承于：Exception)
 
