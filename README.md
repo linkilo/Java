@@ -567,6 +567,10 @@ public static void main(String[]args){
 
 ## 内部类
 
+### 成员内部类
+
+（使用较为麻烦）
+
 ```JAVA
   public static void main(String[] args) {
           Students s=new Students();
@@ -575,8 +579,117 @@ public static void main(String[]args){
 
 public class Students{
    public class Inner {//成员内部类,属性与普通类相同
-        //成员类需要该大类的对象来创建
+        //成员类需要父类的对象来创建
     }
 }
+```
+
+```java
+public static void main(String[] args) {
+        Students s=new Students();
+        Students.Inner inner=s.new Inner();
+        inner.test("我传进参数的name");
+    }
+
+
+public class Students{
+    String name="我是Students类的对象name";
+   public class Inner {//成员内部类,属性与普通类相同
+       String name="我是内部类的name";
+       public void test(String name){
+           System.out.println(name);//传进参数的name
+           System.out.println(this.name);//this指向该类的name
+           System.out.println(Students.this.name);//指向Students类的name
+       }
+    }
+```
+
+### 静态内部类
+
+**不需要依附任何对象可以直接创建内部类的 对象**
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Students.Inner inner=new Students.Inner();
+        //直接创建内部类的对象
+        inner.test();
+    }
+
+}
+
+public class Students{
+    private final String name;
+    public Students(String name){
+        this.name=name;
+    }
+
+    public static class Inner{//静态内部类
+        public void test(){
+            System.out.println("我时静态内部类");
+        }
+    }
+}
+```
+
+### 局部内部类
+
+**局部内部类可以再方法中定义**
+
+但是作用范围只能在这个方法里面
+
+（基本用不到）
+
+```java
+public class Students{
+
+    public void test(){
+        class Inner{
+
+        }
+        Inner inner=new Inner();
+        
+    }
+}
+```
+
+### 匿名内部类
+
+（使用评率高）
+
+```java
+public class Test {
+    static{//静态代码块
+        System.out.println("外部类初始化");
+    }
+
+    public  static class Inner{
+        static {
+            System.out.println("内部类初始化");
+        }
+
+        public void test()
+        {
+            System.out.println("我是静态内部类");
+        }
+    }
+} 
+
+public class Main {
+    public static void main(String[] args) {
+        Test.Inner t=new Test.Inner();
+        t.test();
+    }
+
+}
+
+/*
+执行结果:
+
+内部类初始化
+我是静态内部类
+
+在这个过程值=只初始化了静态内部类
+*/
 ```
 
