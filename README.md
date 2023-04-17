@@ -454,3 +454,129 @@ public static void main(String[]args){
 
 ### 多维数组
 
+```java
+public static void main(String[]args){
+    	int[][] a=new int[10][10];
+    	int[][] arr={
+            {1,2},
+            {2,3},
+            {3,4},
+        };
+    
+}
+```
+
+### 可变长参数
+
+**可变长参数实质上就是数组**
+
+只要输入几个参数，就可以传入几个参数
+
+基本数据类型+...
+
+```java
+public class Main{
+    public static void main(String[] args){
+        teat("hello","world");
+    }
+    
+    public static void test(String... s){
+       System.out.println(s.length);//数组长度
+        for(String i :s){
+            System.out.print(i+" ");
+        }
+    }
+    
+    /*
+    运行结果：
+	2
+	hello world 
+    */
+    //int... float...  ....
+    public static void test1(int a,String... s){
+        //如果要传入其他参数，可变长参数必须放在最后
+    }
+}
+```
+
+**注意：一个方法只能有一个可变长参数**
+
+```java
+public static void main(String[] args){
+    /*
+    对于String[] args
+    这是我们要执行java程序时，输入的命令行参数（很少使用）
+    就是一个空数组
+    */
+}
+```
+
+## 字符串
+
+```java
+public static void main(String[]args){
+    String s="hello world";
+    //字符串内容比较用equals
+    String s1="hello world";
+     System.out.println(s.equals(s1));//true
+    //s.length 字符串长度
+ 	String s2=s.substring(0,5);//裁剪字符串 从下标0到5不包含5
+    String s3=s.replace("hello","1");
+    //reverse 反转
+    //将s中的hello替换成 1；
+    
+    //待补充
+}
+```
+
+### StringBuilder
+
+一个存字符串的容器
+
+可对字符串进行许多操作
+
+在String可用的方法在StringBuilder同样可用
+
+```java
+public static void main(String[]args){
+    StringBuilder s=new StringBuilder;
+    s.append("aaa")//append 方法在s后加上aaa
+    s.delete(1,3)//删除1到3之间的字符串
+        s.
+        append("111");
+    	append("222");//链式操作
+    ...待补充
+}
+```
+
+### 正则表达式
+
+```java
+  public static void main(String[] args) {
+            String s="oooaaa";
+            System.out.print(s.matches("o*a+"));
+      /*
+      通过matches来匹配
+      
+      */
+    }
+
+```
+
+详细规则见菜鸟
+
+## 内部类
+
+```JAVA
+  public static void main(String[] args) {
+          Students s=new Students();
+          Students.Inner inner= s.new Inner();
+    }
+
+public class Students{
+   public class Inner {//成员内部类,属性与普通类相同
+        //成员类需要该大类的对象来创建
+    }
+}
+```
+
