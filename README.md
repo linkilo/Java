@@ -67,9 +67,9 @@ public class person {
 
 ```
 
-所以的类都继承于object类
+**所以的类都继承于object类**
 
-## 继承
+## 继承:extends
 
 ```java
 public class person {
@@ -79,8 +79,12 @@ public person(String name, int age, String sex) {
         this.sex = sex;
     }//若父类使用了该构造方法则子类也应该继承该构造方法，子类用super来调用该方法
 }
+
 public class Students extends person{
-public Students (String name,int age,String sex)	{
+    //在类名后面加上 extends 被继承的类名 
+//表示Students 类继承了person类
+//
+	public Students (String name,int age,String sex){
         super(name,age ,sex);//super表示父类的构造
     }
     /*
@@ -90,15 +94,12 @@ public Students (String name,int age,String sex)	{
     */
 
 }
-//在类名后面加上 extends 被继承的类名 
-//表示Students 类继承了person类
-//
 
 ```
 
 
 
-## 重写
+## 重写:@Override
 
 方法的重载是为某个方法提供更多的种类，而方法的重写则是覆盖掉原来的方法。
 
@@ -113,10 +114,11 @@ public Students (String name,int age,String sex)	{
 如果不想让任何子类再去重写这个方法 则只需要加上final 表示为最终不可再次被重写 public final void test(){}
 
 同理对于成员变量 在成员变量前加上final 则只有在构造时给该变量赋值，而如果该变量已经有初始值了，则构造时也不能给该成员变量赋值
-final String name;
+
+~~final String name;~~
 
 同理 对于类 ，在类前加上final 则表明该类不能被继承
-public final class person
+~~public final class person~~
 
 ```java
 public class person {
@@ -136,6 +138,7 @@ public class person {
     /*
     如果不想让任何子类再去重写这个方法 则只需要加上final 表示为最终
     不可再次被重写 public final void test(){}
+    
     同理对于成员变量 在成员变量前加上final 则只有在构造时给该变量赋值
     而如果该变量已经有初始值了，则构造时也不能给该成员变量赋值
     final String name;
@@ -166,18 +169,19 @@ public class person {
     }
 
 }
+
+//toString 和 equals 都是Object类的方法 而所有的类都默认继承于Object 所以可以不用写 extends Object
 ```
 
-## 抽象类
+## 抽象类:abstract
 
-在class前加上 abstract 也可以在成员变量和成员方法前加abstract 抽象方法可以看做一个函数但是这个函数没有任何内容，只有函数名和参数，这个抽象方法可以被他的子类（重写）调用，抽象方法在不同的子类，重写方式不同，故运行结果不同，这就是多态。。
+在（类）class前加上 abstract 也可以在成员变量和成员方法前加abstract， 抽象方法可以看做一个函数但是这个函数没有任何内容，只有函数名和参数，这个抽象方法可以被他的子类（重写）调用，抽象方法在不同的子类，重写方式不同，故运行结果不同，~~这就是多态~~。
+
+**抽象方法没有主体**
 
 ```java
 public abstract class person{//抽象类
     public abstract void exam();//抽象方法 没有主体
-        
-    
-    
 }
 
 public class student1 extends person{
@@ -194,13 +198,13 @@ public class student1 extends person{
 
 **抽象方法的访问权限不能为private**
 
-## 接口
+## 接口:interface
 
-接口只代表某个确切的功能，是一种只包含方法的定义，严格来说不能算作一个类。但是为了方便理解可以将接口看做一个抽象类，而且这个接口里面只有抽象方法。
+接口只代表某个确切的功能，是一种只包含方法的定义，严格来说不能算作一个类。~~但是为了方便理解可以将接口看做一个抽象类，而且这个接口里面只有抽象方法。~~
 
-**简单来说接口就是将类所具有的某些行为（方法）抽象出来，将这些方法放在接口中，如果有类要使用该方法，就可以直接继承（调用）这个接口的方法，每个类可以通过不同的重写以此来实现相同的方法在不同的类，实现目标不同**
+**简单来说接口就是将类所具有的某些行为（方法）抽象出来，将这些方法放在接口中，如果有类要使用该方法，就可以直接继承（调用）这个接口，然后再使用这个方法，每个类可以通过不同的重写以此来实现相同的方法在不同的类，所实现目标不同**
 
-**注意：抽象方法不能有主体，在继承接口后必须在类里面实现这个方法**
+**注意：抽象方法不能有主体，在某个类继承接口后必须在这个类里面实现这个方法**
 
 ```java
 public interface Study{//名为Study的接口
@@ -210,7 +214,7 @@ public interface Study{//名为Study的接口
     但接口内默认为 public abstract 所可以省略
     */
     //如果想在接口内实现一个方法，则只需要在前加上default
-    default void study(){
+    default void study_1(){
         System.out.println("我学习能力很好");
     }
 }
@@ -218,14 +222,14 @@ public class sutdnets implements Study{
     //类通过 implements 加接口名来调用一个接口
     //可以在这里加上 @Override 看做重写
     public void study(){//实现接口 
-        
+        System.out.println("我学习能力很好");
     }
 }
 ```
 
-**接口可以相互继承，接口可以多继承**
+**接口可以相互继承，一个接口可以多继承**
 
-倘若一个类(接口)继承了另一个接口并且实现了一个方法，那么在另一个类(接口)继承这个类（接口）时可以不用再去实现这个方法。**简单来说一个(同名)方法只要在某个地方实现了一次（前提之间有继承关系），那么其他地方可以不用再去实现，除非要实现不同的目标。**
+倘若一个**类(接口)**继承了另一个接口并且实现了接口里面的一个方法，那么在另一个类(接口)继承这个**类（接口）**时可以不用再去实现这个方法。**简单来说一个(同名)方法只要在某个类（接口）实现了一次（前提是这些类之间有继承关系），那么其他类可以不用再去实现，除非要实现不同的目标。**
 
 ```java
 public class Main{//main类
@@ -235,9 +239,10 @@ public class Main{//main类
     }
 }
 
-public interface A{
+public interface A{//A接口
     void test();
 }
+
 public class Test{
     public void test(){
         System.out.println("我是父类实现");
@@ -261,9 +266,9 @@ public class Test1 extends Test implements A{
 }
 ```
 
-**由此可以看出，一个类的父类和接口都有一个方法，并且父类已经实现该方法，则该类的对象优先使用父类的实现方法。（类大于接口）**
+~~**由此可以看出，一个类的父类和接口都有一个方法，并且父类已经实现该方法，则该类的对象优先使用父类的实现方法。（类大于接口）**~~
 
-## 枚举
+## 枚举：enum
 
 ```java
 public class Main {//main
@@ -275,13 +280,13 @@ public class Main {//main
 }
 
 public class Students{//学生类
-        private Status status;//封装
+        private Status status;//封装，只能在该类里面调用这个成员变量
 
-    public Status getStatus() {
+    public Status getStatus() {//通过getStatus函数可以将封装好的成员变量传出去，但是外部只能获得这个值，并没有改变这个变量的能力
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(Status status) {//通过setStatus外部可以实现对封装好的成员变量赋值的操作
         this.status = status;
     }
 }
@@ -317,12 +322,13 @@ boolean->Boolean
 public class Main{
     public static void main(String[] args){
         Integer i=new Integer(10);//Integer类
-        //i=10 作为对象的一个int
+        //i=10 作为对象的一个i
     }
 }
 /*Integer的类里面有 public Integer(int value){
 		this.value=value;
-}*/所以可当做对象去使用
+}*/
+//所以可当做类去new一个对象使用
 ```
 
 **包装类型支持自动封装**
@@ -331,7 +337,7 @@ public class Main{
 
 ```java
 public static void main(String[] args){
-    Integer i=10;//将int类型值作为包装类型使用
+    Integer i=10;
     /*
     自动装箱实际上隐式调用了 Integer i=Integer.valueOf（10);
    	其中Integer.valueOf(10)直接简化成了10
@@ -360,7 +366,7 @@ public static void main(String[]args){
 }
 ```
 
-有了这种自动装箱和拆箱的机制，才可以让包装类型轻松的参与到基本类型的运算。
+**有了这种自动装箱和拆箱的机制，才可以让包装类型轻松的参与到基本类型的运算。**
 
 ```java
 public static void main(String[]args){
@@ -375,6 +381,13 @@ public static void main(String[]args){
 ```
 
 （以上同理其他基本数据类型）
+
+```java
+//装箱调用 Integer i=Integer.valueOf(value);
+//拆箱调用 int a=i.intValue();
+```
+
+
 
 ### 数据类型转换
 
@@ -392,11 +405,13 @@ public static void main(String[args]){
 	Integer a=Integer.decode("0xAA");//16进制
     //a=170;
 }
-
+//待补充
 
 ```
 
 ### 特殊包装类
+
+~~了解？~~
 
 用于计算超大类型数字的BigInteger（没有限制）
 
@@ -440,15 +455,17 @@ int[] a ={...};
 public static void main(String[]args){
     int[] a =new int[10];//长度为10的数组
     int [] b=new int[]{1,2,3,4};//静态初始化
-    //int[] b={1,2,3,4};
-    int cl=b.clone();
-    cl={1,2,3,4};
+    //可以简写为：int[] b={1,2,3,4};
+    int cl=b.clone();//克隆
+    //cl={1,2,3,4};
     /*
-    与c不同的是有String
+    与c语言不同的是有String
     类型数组
     */
-    String[] c=new String[10];
-    c[0]="hello ,world";
+    String[] c=new String[2];
+    c[0]="hello";
+    c[1]="world";
+    System.out.println(c[0]+" "+c[1]);// 输出hello world。
 }
 ```
 
@@ -457,7 +474,7 @@ public static void main(String[]args){
 ```java
 public static void main(String[]args){
     	int[][] a=new int[10][10];
-    	int[][] arr={
+    	int[][] arr={//静态初始化
             {1,2},
             {2,3},
             {3,4},
@@ -472,12 +489,12 @@ public static void main(String[]args){
 
 只要输入几个参数，就可以传入几个参数
 
-基本数据类型+...
+基本数据类型+“...”
 
 ```java
 public class Main{
     public static void main(String[] args){
-        teat("hello","world");
+        test("hello","world");
     }
     
     public static void test(String... s){
@@ -489,10 +506,10 @@ public class Main{
     
     /*
     运行结果：
-	2
+	2         (数组长度)
 	hello world 
     */
-    //int... float...  ....
+    //int... float... 等基础类型都可以
     public static void test1(int a,String... s){
         //如果要传入其他参数，可变长参数必须放在最后
     }
@@ -521,10 +538,10 @@ public static void main(String[]args){
      System.out.println(s.equals(s1));//true
     //s.length 字符串长度
  	String s2=s.substring(0,5);//裁剪字符串 从下标0到5不包含5
-    String s3=s.replace("hello","1");
-    //reverse 反转
-    //将s中的hello替换成 1；
+    String s3=s.replace("hello","1");//将hello替换成1
     
+    
+    //reverse 反转
     //待补充
 }
 ```
@@ -535,7 +552,7 @@ public static void main(String[]args){
 
 可对字符串进行许多操作
 
-在String可用的方法在StringBuilder同样可用
+**在String可用的方法在StringBuilder同样可用**
 
 ```java
 public static void main(String[]args){
@@ -563,13 +580,13 @@ public static void main(String[]args){
 
 ```
 
-详细规则见菜鸟
+~~详细规则图表见菜鸟~~
 
 ## 内部类
 
 ### 成员内部类
 
-（使用较为麻烦）
+~~（使用较为麻烦）~~
 
 ```JAVA
   public static void main(String[] args) {
@@ -1173,7 +1190,7 @@ public class Main {
 }
 ```
 
-## 类型擦除
+## 类型擦除(p78)
 
 范型的实现：
 
@@ -1243,3 +1260,6 @@ public class Main {
 }
 ```
 
+## 函数式接口
+
+函数式接口：用于Lambda表达式的接口，这些接口可以直接使用Lambda表达式
