@@ -947,13 +947,11 @@ public class Main {
 
 ## 范型
 
-范型能够在编译阶段检查类型拿权，大大提升开发效率。
-
 ```java
 public class Score {
     String name;
     String id;
-    Object value;//Object 为父类可以存放各种类型的变量
+    Object value;//Object为父类可以存放各种类型的变量
     public Score(String name,String id,Object value){
         this.name=name;
         this.id=id;
@@ -980,6 +978,8 @@ public class Main{
 变量类型。
 
 ### 范型类
+
+**范型仅仅是在编译阶段进行类型检查**
 
 范型就是一个待定类型，可以使用一个特殊的名字表示范型，范型在定义的时候并不明确是什么类型，而是在需要用到是才会确定对应的范型类型。
 
@@ -1009,7 +1009,7 @@ public class Main{
         Score<String> s1=new Score<String>("eng","2","A");
         //在定义时明确变量类型
 //可以简写为Score<Integer> s = newScore<>("math","1",90);
-        //<?>:表示待定 可以传任何类型变量
+        //<?>:通配符：可以传任何类型变量
     }
 }
 ```
@@ -1120,5 +1120,126 @@ public class Main{
 }
 ```
 
+### 范型界限
 
+#### 范型上界
+
+如果我们不想让某个变量是除数字类型以外的其他类型，就可以使用范型的上界定义
+
+```java
+public class Score<T extends Number> {//通过继承的方法 使这个类型实参继承于NUmber类，就可以限定这类型实参只能是数字类型
+        String name;
+        int id;
+        T value;
+
+        public Score(String name,int id, T value){
+                this.name=name;
+                this.id=id;
+                this.value=value;
+        }
+}
+
+public class Main {
+    public static void main(String[] args){
+            Score s=new Score("math",1,1);
+    }
+}
+```
+
+**通过给范型设定上限，我们就可以更加灵活地控制范型的具体类型**
+
+#### 范型下界
+
+**范型下界只能用在通配符<?>**
+
+```java
+public class Score<T extends Number> {//通过继承的方法 使这个类型实参继承于NUmber类，就可以限定这类型实参只能是数字类型
+        String name;
+        int id;
+        T value;
+
+        public Score(String name,int id, T value){
+                this.name=name;
+                this.id=id;
+                this.value=value;
+        }
+}
+public class Main {
+    public static void main(String[] args){
+          Score<? super Integer> s =new Score("math",1,1);
+          //用super 设置下界，该类型实参只能使用NUmber的子类和Integer的父类
+
+    }
+}
+```
+
+## 类型擦除
+
+范型的实现：
+
+```java
+public abstract class A <T>{//抽象类 范型
+    abstract T test(T t);
+}
+```
+
+如果没有设定界限那么编译后
+
+```java
+public abstract class A <T>{
+    abstract Object test(Object t);//默认是Object
+}
+```
+
+如果设定了上限
+
+```java
+public abstract class A <T extends Number>{
+    abstract T test(T t);
+}
+```
+
+编译后
+
+```java
+public abstract class A <T>{
+    abstract Number test(Number t);//上界为Number，只能为Number或者Number的子类
+}
+```
+
+所以说**范型仅仅是在编译阶段进行类型检查**。
+
+```java
+public class Score<T> {//通过继承的方法 使这个类型实参继承于NUmber类，就可以限定这类型实参只能是数字类型
+        String name;
+        int id;
+        T value;
+        public void setValue(T value){
+                this.value=value;
+        }
+        public Score(String name,int id, T value){
+                this.name=name;
+                this.id=id;
+                this.value=value;
+        }
+
+        public T getValue(){
+                return value;
+        }
+}
+
+public class Main {
+    public static void main(String[] args){
+        Score<Integer> s=new Score<Integer>("math",1,1);
+        Score s1=new Score<Integer>("math",1,2);
+        /*
+        （原始引用）类型擦除 :这样写就不会进行类型检查，所以就算我给s1
+        传一个String类型的变量也不会报错
+        相当于跳过了编译时的类型检查
+        */
+        s1.setValue("我是String类型");
+        System.out.println(s1.getValue());
+    }
+}
+```
 
