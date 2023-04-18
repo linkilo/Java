@@ -170,7 +170,7 @@ public class person {
 
 ## 抽象类
 
-在class前加上 abstract 也可以在成员变量和成员方法前加abstract 抽象方法可以看做一个函数但是这个函数没有任何内容，只有函数名和参数，这个抽象方法可以被他的子类（重写）调用，抽象方法在不同的子类，重写方式不同，故运行结果不同。
+在class前加上 abstract 也可以在成员变量和成员方法前加abstract 抽象方法可以看做一个函数但是这个函数没有任何内容，只有函数名和参数，这个抽象方法可以被他的子类（重写）调用，抽象方法在不同的子类，重写方式不同，故运行结果不同，这就是多态。。
 
 ```java
 public abstract class person{//抽象类
@@ -867,4 +867,258 @@ public class Main {
 1：运行时异常（继承于：RuntimeExceptiomn）
 
 2：编译时异常(继承于：Exception)
+
+### 抛出异常
+
+实际上是将异常对象抛出
+
+主动抛出异常:
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(test(1,0));
+    }
+    public static int test(int a,int b){
+        // ArithmeticException:（算数异常）运行时异常
+        // Exception：编译时异常
+        // ArithmeticException Exception =new ArithmeticException("除数不能为0);
+        if(b==0)
+            throw new ArithmeticException("除数不能为0");//创建异常对象
+        return a/b;
+    }
+}
+
+/*
+Exception in thread "main" java.lang.ArithmeticException: 除数不能为0
+	at com.test.Main.test(Main.java:14)//指明错误位置
+	at com.test.Main.main(Main.java:9)
+
+
+*/
+```
+
+### 异常处理
+
+//待补充
+
+## 常用工具类
+
+### 数学工具类
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        //Math是java。lang包下的类，所以默认可以直接使用
+        Math.abs(-1);//求绝对值
+        Math.max(1,2);//求最大值
+        Math.min(1,2);
+        Math.sqrt(9);//算数平方根
+        Math.pow(5,3);//5的3次方
+        //Math.PI=π
+        Math.sin(Math.PI/2);//求π/2的正弦值
+        //同理有Math.cos Math.tan
+        Math.asin(1);//反三角函数 求arcsin1的值
+        //同理 Math.acos Math.atan;
+        Math.log(4)/Math.log(2);//以2为底4的对数
+        
+    }
+}
+/
+
+```
+
+### 数组工具类
+
+```java
+public class Main {
+    public static void main(String[] args) {
+      int [] a=new int[]{1,0,2,3,4,5,7};
+        System.out.println(Arrays.toString(a));//打印数组
+        Arrays.sort(a);//排序
+        int [] b=new int[10];
+        Arrays.fill(b,5);//用5填充数组
+        int[] c=Arrays.copyOfRange(a,0,3);//复制a数组0到3之间的数
+        System.out.println(Arrays.toString(c));
+    }
+}
+//待补充
+```
+
+## 范型
+
+范型能够在编译阶段检查类型拿权，大大提升开发效率。
+
+```java
+public class Score {
+    String name;
+    String id;
+    Object value;//Object 为父类可以存放各种类型的变量
+    public Score(String name,String id,Object value){
+        this.name=name;
+        this.id=id;
+        this.value=value;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+}
+
+public class Main{
+    public static void main(String[] args){
+        Score s=new Score("math","1",90);
+        Score s1=new Score("eng","2","A");
+        int n=(int)s.getValue();
+        String d=(String)s1.getValue();
+    }
+}
+```
+
+但是直接使用Object存变量时，如果工程量大，可能会弄混Object内存的
+
+变量类型。
+
+### 范型类
+
+范型就是一个待定类型，可以使用一个特殊的名字表示范型，范型在定义的时候并不明确是什么类型，而是在需要用到是才会确定对应的范型类型。
+
+```java
+public class Score<T> {//在类名后加一个<> <>内起名字（推荐大写字母）
+    String name;
+    String id;
+    T value;//将Object替换为T
+    public Score(String name,String id,T value){
+        this.name=name;
+        this.id=id;
+        this.value=value;
+    }
+
+    public T getValue() {
+        return value;
+    }
+}
+
+public class Main{
+    public static void main(String[] args){
+        Score<Integer> s=new Score<Integer("math","1",90);
+       	//注意类型实参不能是int(不能是基元参数)
+        //Score<int> 错误
+        //如果是数组用int[]
+        //Score<int[]>
+        Score<String> s1=new Score<String>("eng","2","A");
+        //在定义时明确变量类型
+//可以简写为Score<Integer> s = newScore<>("math","1",90);
+        //<?>:表示待定 可以传任何类型变量
+    }
+}
+```
+
+在范型没有确定时，默认为Object。
+
+<u>静态内容不能使用范型变量</u>
+
+如果使用多个范型变量
+
+```java
+public class Score<T,U> {
+    String name;
+    U id;
+    T value;//Object 为父类可以存放各种类型的变量
+    public Score(String name,U id,T value){
+        this.name=name;
+        this.id=id;
+        this.value=value;
+    }
+
+    public T getValue() {
+        return value;
+    }
+}
+public class Main{
+    public static void main(String[] args){
+      Score<Integer,Integer> s = newScore<Integer,Integer("math",1,90);
+        Score<Integer,String>s1=newScore<Integer,String("eng","2,1);
+        //在定义时明确变量类型
+        int n= s.getValue();
+        int f= s1.getValue();
+        System.out.println(n);
+        System.out.println(f);
+    }
+}
+```
+
+### 范型与多态
+
+范型可以应用于类，抽象类，接口
+
+```java
+public interface Study<E> {
+    E test();
+}
+public class Main{
+    public static void main(String[] args){
+        b s1=new b();
+        s1.test();
+        a<String> s =new a<>();
+        s.test();
+    }
+
+    static class b implements Study<String>{//实现Study
+        @Override
+        public String test() {
+            return null;
+        }
+    }
+    static class a<T> implements Study<T>{
+        @Override
+        public T test() {
+            return null;
+        }
+    }
+}
+```
+
+### 范型方法
+
+```java
+public class Main{
+    public static void main(String[] args){
+        String s=test("xxx");
+        int n=test(1);
+        System.out.println(s);
+        System.out.println(n);
+    }
+    public static<T> T test(T t){//范型方法
+        return t;
+    }
+}
+```
+
+Arrays.sort 排序 
+
+```java
+public class Main{
+    public static void main(String[] args){
+        Integer[] a={2,3,4,5,6,7};
+        Arrays.sort(a,(o1,o2)->o1-o2);
+        //（不能是基元类型数组：int）
+        //Lambda表达式
+        //o1-o2从小到大排序
+        //o2-o1从大到小排序
+        /*
+        原型：
+        Arrays.sort(a, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1-o2;
+            }
+        });
+        */
+        System.out.println(Arrays.toString(a));
+    }
+}
+```
+
+
 
