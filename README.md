@@ -1264,9 +1264,9 @@ public class Main {
 
 函数式接口：用于Lambda表达式的接口，这些接口可以直接使用Lambda表达式
 
-### Supplier供给型函数式接口
+**这些函数接口都在 java.util.function 这个包里面**
 
-在 java.util.function 这个包里面
+### Supplier供给型函数式接口
 
 这个接口专门用于供给使用的，这个接口里只有一个未实现的get方法用于获取需要的对象
 
@@ -1278,6 +1278,8 @@ public interface Supplier<T>{
 ```
 
 ```java
+import java.util.function.Supplier;
+
 public class Main {
     public static void main(String[] args){
         Supplier<student> studentSupplier = new Supplier<student>() {
@@ -1304,19 +1306,109 @@ public class Main {
 
 通过Supplier里的get方法，制造出了一个学生制造器，当我们想得到一个新的学生对象时，直接可以调用Supplier里的get 方法 get一个新对象
 
-### consumer消费型函数式接口
+### Consumer消费型函数式接口
 
 这个接口专门用于消费某个对象
 
 ```java
 @FunctionalInterface
 public interface Consumer<T>{
-    void accept(T t); //这个方法就是用于消费，没有返回值
-    default Consume<T> andThen(Consumer<? super T> after){
-        Object.requireNonNULL(after);
-        return (T t) -> {accept(t); after.accept(t);};
-    }//这个方法便于我们连续使用此消费接口
+    void accept(T t); //这个方法就是用于消费，没有返回值(消费传入的参数)
+    default Consumer<T> andThen(Consumer<? super T> after) {
+        Objects.requireNonNull(after);
+        return (T t) -> { accept(t); after.accept(t); };
+    }//该方法可以让我们多次使用Consumer()
+}
+```
+
+```java
+import java.util.function.Consumer;
+
+public class Main {
+    public static void main(String[] args){
+        Consumer<student> studentConsumer= student -> System.out.println("我是"+student.getName()+"是一名学生");
+        student s=new student();
+        s.setName("kilo");
+        studentConsumer.accept(s);
+    }
+
+    public static class student{
+         private String name;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+        public String getName(){
+            return name;
+        }
+    }
+}
+// 执行结果：我叫kilo是一名学生
+```
+
+### Function函数型函数式接口
+
+这个接口消费一个对象，然后再向外供给一个对象~~（相当于前两个的结合体）~~
+
+```java
+@FunctionalInterface
+public interface Function<T, R> {
+    R apply(T t);
     
+     default <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
+        Objects.requireNonNull(before);
+        return (V v) -> apply(before.apply(v));
+    }
+    default <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
+        return (T t) -> after.apply(apply(t));
+    }
+     static <T> Function<T, T> identity() {
+        return t -> t;
+    }
+}
+```
+
+```java
+import java.util.function.Function;
+
+public class Main {
+    public static void main(String[] args){
+
+        Function<Integer,String> integerStringFunction=Object::toString;
+        //调用toString将Integer类型转化为String类型
+        String s=integerStringFunction.apply(10);
+        System.out.println(s);
+
+
+        Function<student,String> studentStringFunction=Object::toString;
+        String s1=studentStringFunction.apply(new student());
+        System.out.println(s1);
+
+
+        //如果传入参数为String类型，要实现Integer->String,就要先将String变为Integer再实现Integer->toString
+        //String->Integer就需要用到Function 内的 .compose 实现参数转化
+        Function<Integer,String> integerStringFunction1=Object::toString;
+        String s2=integerStringFunction1
+                .compose(String::length)//将此函数的返回值作为当前实现的实参
+                .apply("kilo");
+        System.out.println(s2);
+        //String->Integer->String
+        //第一步：.apply传入参数
+        //第二步：.compose 通过引用String里的.length方法将String类型变为Integer类型（实际上求的字符串长度，在将该函数的返回值（Integer）作为当前实现的实参）
+        //第三步：之后再实现Object里的toString方法 将Integer变为String类型
+    }
+
+    public static class student{
+
+        private String name;
+        public void setName(String name){
+            this.name=name;
+        }
+        public String getName(){
+            return name;
+        }
+    }
 }
 ```
 
