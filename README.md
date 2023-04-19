@@ -586,7 +586,7 @@ public static void main(String[]args){
 
 ### 成员内部类
 
-~~（使用较为麻烦）~~
+（使用较为麻烦）
 
 ```JAVA
   public static void main(String[] args) {
@@ -779,7 +779,7 @@ public interface Study {//Study接口
 
 通过匿名内部类，我们可以创建一个临时的实现子类
 
-如果一个接口中有且只有一个待实现的抽象方法，那么我吗可以将匿名内部类简写成Lambda表达式：
+如果一个接口中有且只有一个待实现的抽象方法（接口内用default已经实现的方法可以不管），那么我吗可以将匿名内部类简写成Lambda表达式：
 
 ```java
 public interface Study {
@@ -1263,3 +1263,60 @@ public class Main {
 ## 函数式接口
 
 函数式接口：用于Lambda表达式的接口，这些接口可以直接使用Lambda表达式
+
+### Supplier供给型函数式接口
+
+在 java.util.function 这个包里面
+
+这个接口专门用于供给使用的，这个接口里只有一个未实现的get方法用于获取需要的对象
+
+```java
+@FunctionalInterface //函数式接口
+public interface Supplier<T>{
+	T get(); //该方法用于实现供给功能
+}
+```
+
+```java
+public class Main {
+    public static void main(String[] args){
+        Supplier<student> studentSupplier = new Supplier<student>() {
+            @Override
+            public student get() {
+                return new student();//返回一个学生对象
+            }
+        };
+        studentSupplier.get().test();//需要调用get方法
+        Supplier<student> studentSupplier1=()->new student();//Lambda表达式
+        studentSupplier1.get().test();
+        Supplier<student> studentSupplier2=student::new;//方法引用
+        studentSupplier2.get().test();
+    }
+
+    public static class student{//在Main类里需为static静态类才能供main使用
+
+        public void test(){
+            System.out.println("我是学生");
+        }
+    }
+}
+```
+
+通过Supplier里的get方法，制造出了一个学生制造器，当我们想得到一个新的学生对象时，直接可以调用Supplier里的get 方法 get一个新对象
+
+### consumer消费型函数式接口
+
+这个接口专门用于消费某个对象
+
+```java
+@FunctionalInterface
+public interface Consumer<T>{
+    void accept(T t); //这个方法就是用于消费，没有返回值
+    default Consume<T> andThen(Consumer<? super T> after){
+        Object.requireNonNULL(after);
+        return (T t) -> {accept(t); after.accept(t);};
+    }//这个方法便于我们连续使用此消费接口
+    
+}
+```
+
