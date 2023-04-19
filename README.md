@@ -1,3 +1,8 @@
+0.o
+o.0
+Java is a piece of shit
+0.o
+o.0
 # Java 基础语法
 
 一个Java程序可以认为是一系列对象的集合
