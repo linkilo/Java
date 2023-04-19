@@ -1369,6 +1369,10 @@ public interface Function<T, R> {
 }
 ```
 
+#### compose
+
+可以将指定函数式的结果作为当前函数式的实参。
+
 ```java
 import java.util.function.Function;
 
@@ -1411,4 +1415,292 @@ public class Main {
     }
 }
 ```
+
+#### andThen
+
+~~后置操作~~
+
+和compose相反的andThen可以将当前实现的返回值进行进一步处理，得到其他类型的值。
+
+```java
+public class Main {
+    public static void main(String[] args){
+        boolean str =integerStringFunction1
+                .andThen(String::isEmpty)//判断是否为空
+                .apply(10);
+        System.out.println(str);
+    }
+
+    public static class student{
+
+        private String name;
+        public void setName(String name){
+            this.name=name;
+        }
+        public String getName(){
+            return name;
+        }
+    }
+}
+```
+
+### Predicate断言型函数式接口
+
+接收一个参数，然后进行自定义判断并返回一个**boolean**结果
+
+```java
+@FunctionalInterface
+public interface Predicate<T>{
+    boolean test(T t);// 这是我们要实现的方法
+	
+    default Predicate<T> and(Predicate<? super T> other) {//同时满足返回true
+        Objects.requireNonNull(other);
+        return (t) -> test(t) && other.test(t);
+    }
+    
+    default Predicate<T> negate() {
+        return (t) -> !test(t);
+    }
+    
+    default Predicate<T> or(Predicate<? super T> other) {//只要有真返回true
+        Objects.requireNonNull(other);
+        return (t) -> test(t) || other.test(t);
+    }
+    
+    static <T> Predicate<T> isEqual(Object targetRef) {
+        return (null == targetRef)
+                ? Objects::isNull
+                : object -> targetRef.equals(object);
+    }
+    
+    static <T> Predicate<T> not(Predicate<? super T> target) {
+        Objects.requireNonNull(target);
+        return (Predicate<T>)target.negate();
+    }
+}
+```
+
+
+
+```java
+import java.util.function.Predicate;
+
+public class Main {
+    public static void main(String[] args){
+        Predicate<student> studentPredicate=student -> student.score>=60;
+        //通过这个断言表达式，我们可以判断一个学生的成绩是否大于60
+        student s=new student();
+        s.score=90;
+        if(studentPredicate.test(s)){
+            System.out.println("成绩合格");
+        }
+        else{
+            System.out.println("成绩不合格");
+        }
+    }
+
+    public static class student{
+        int score =100;
+
+    }
+}
+```
+
+```java
+import java.util.function.Predicate;
+
+public class Main {
+    public static void main(String[] args){
+        Predicate<student> studentPredicate=student -> student.score>=60;
+        student s=new student();
+        s.score=90;
+        boolean b=studentPredicate
+                .and(stu -> stu.score>=90)//除了满足大于60还要满足大于90
+                .test(s);
+
+        if(b){
+            System.out.println("成绩不错");
+        }
+        else{
+            System.out.println("emmm...");
+        }
+    }
+
+    public static class student{
+        int score =100;
+
+    }
+}
+```
+
+### 判空包装
+
+很有效的处理空指针问题
+
+列如：
+
+```java
+public class Main {
+    public static void main(String[] args){
+           
+    }
+    private  static void test(String s){
+        if(!s.isEmpty())
+            System.out.println(s.length());//如果不为空则打印长度
+    }
+}
+```
+
+这个方法如果字符串不为空则打印长度
+
+那如果我们传进一个null进去
+
+```java
+public class Main {
+    public static void main(String[] args){
+           test(null);
+    }
+    private  static void test(String s){
+        if(!s.isEmpty())
+            System.out.println(s.length());//如果不为空则打印长度
+    }
+}
+
+//会直接报错
+/*
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.isEmpty()" because "s" is null
+	at com.test.Main.test(Main.java:14)
+	at com.test.Main.main(Main.java:10)
+
+*/
+//直接传null(不引用任何对象)进去会报错，null不引用任何对象，所以不能调用isEmpty判断，所以传null会导致空指针异常
+```
+
+所以要在之前加一个判空处理
+
+```java
+public class Main {
+    public static void main(String[] args){
+            test(null);
+    }
+    private  static void test(String s){
+        if(s==null) return ;//如果为空直接返回
+        if(!s.isEmpty())
+            System.out.println(s.length());
+    }
+}
+//这样就不会报错
+```
+
+~~而Optional类可以更加**优雅**的处理这种问题~~
+
+```java
+import java.util.Optional;
+
+public class Main {
+    public static void main(String[] args){
+            test(null);
+    }
+    private  static void test(String s){
+        Optional
+                .ofNullable(s)
+                .ifPresent(s1 -> {//判断是否存在，只有不为空才执行
+                    if(!s.isEmpty())
+                        System.out.println(s.length());
+                });
+
+    }
+}
+```
+
+# 数据结构
+
+数据结构是数据值的集合，可以体现数据值之间的关系，一家对数据进行应用的函数或操作
+
+## 线性表
+
+有两种实现方式：**顺序储存/链式储存**
+
+是由同一类型的数据元素构成的有序序列的线性结构。线性表的元素个数就是线性表的长度，
+
+起始位置是表头，结束位置是表尾。当一个线性表中没有元素时，称为空表。
+
+功能：
+**获取指定位置元素**
+
+**插入**
+
+**删除**
+
+**获取长度**
+
+### 顺序表（顺序储存）：
+
+存放数据还是用数组，但是可以使用额外的操作来强化为线性表。
+
+像这样底层依然采用顺序储存实现的线性表，称为顺序表。
+
+```java
+public class ArrayList<E> {//定义为范型
+    public int size=0;//表示表里有几个元素
+    private int capacity=10;//表的容量
+    private Object[] array =new Object[capacity];//底层数组
+
+    //插入（将插入位置后的元素全部向后移动一位）
+    public void add(int index,E element){ //index 插入位置
+        if(index<0||index>size){
+            System.out.println("非法位置"); //只能在0~size之间插入
+        }
+        if(size>=capacity){//扩容
+            int newCapacity = capacity+(capacity>>1);//扩容为1.5倍
+            Object[] newArray =new Object[newCapacity];
+            System.arraycopy(array,0,newArray,0,size);//拷贝
+            array=newArray;
+        }
+        //从后往前遍历
+        for(int i=size;i>index;i--){
+            array[i]=array[i-1];
+        }
+        array[index]=element;
+        size++;
+    }
+
+    public void getArray(){
+        for(int i=0;i<size;i++){
+            System.out.print(array[i]+" ");
+        }
+    }
+
+}
+
+}
+
+public class Main {
+    public static void main(String[] args){
+        ArrayList<Integer> l=new ArrayList<>();
+        l.add(0,1);
+        l.add(0,2);
+        l.getArray();
+    }
+}
+
+```
+
+
+
+### 链表：
+
+### 栈：
+
+### 队列：
+
+## 树
+
+### 二叉树：
+
+### 二叉查找树和平衡二叉树：
+
+### 红黑树：
+
+## 哈希表
 
