@@ -1,8 +1,9 @@
 **0.o**    
-**o.0**    
+**o.0**  
 **Java is a piece of shit**   
 **0.o**
 **o.0**
+
 # Java 基础语法
 
 一个Java程序可以认为是一系列对象的集合
@@ -1653,30 +1654,47 @@ public class ArrayList<E> {//定义为范型
 
     //插入（将插入位置后的元素全部向后移动一位）
     public void add(int index,E element){ //index 插入位置
-        if(index<0||index>size){
+        if(index<0||index>size){//判断是否合法
             System.out.println("非法位置"); //只能在0~size之间插入
         }
         if(size>=capacity){//扩容
             int newCapacity = capacity+(capacity>>1);//扩容为1.5倍
             Object[] newArray =new Object[newCapacity];
             System.arraycopy(array,0,newArray,0,size);//拷贝
+            //从array数组的0号下标开始复制，复制到 newArray数组的0到size号下标
             array=newArray;
         }
         //从后往前遍历
-        for(int i=size;i>index;i--){
+        for(int i=size;i>index;i--){//插入操作
             array[i]=array[i-1];
         }
         array[index]=element;
         size++;
     }
 
+    //删除元素
+    public E remove(int index){//要删除元素的下标
+        if(index<0||index>size-1){
+            throw  new IndexOutOfBoundsException("删除位置非法");
+        }
+        E e=(E)array[index];
+        for(int i=index;i<size;i++){
+            array[i]=array[i+1];
+        }
+        size--;
+        return e;
+    }
+
+    public  E get(int index){//获取指定位置的元素
+        if(index<0||index>size)
+            throw  new IndexOutOfBoundsException("获取位置非法");
+        return (E)array[index];
+    }
     public void getArray(){
         for(int i=0;i<size;i++){
             System.out.print(array[i]+" ");
         }
     }
-
-}
 
 }
 
@@ -1695,7 +1713,116 @@ public class Main {
 
 ### 链表：
 
+```java
+public class LinkList <E>{
+    private  Node<E> head =new Node<>(null);//头结点
+    private int size;//长度
+    private static class Node<E>{//节点
+        private E element;
+        private Node<E> next;
+        public Node(E e){
+            this.element=e;
+        }
+    }
+
+    //插入
+    public void add(E element,int index){
+        if(index<0||index>size){
+            throw new IndexOutOfBoundsException("插入位置非法");
+        }
+        Node<E> prv=head;
+        for(int i=0;i<index;i++){
+            prv=prv.next;
+        }
+        Node<E> n=new Node<>(element);
+        n.next=prv.next;
+        prv.next=n;
+        size++;
+    }
+
+
+    //删除
+    public E delete(int index){
+        if(index<0||index>size){
+            throw new IndexOutOfBoundsException("删除位置非法");
+        }
+        Node<E> prv=head;
+        for(int i=0;i<index;i++){
+            prv=prv.next;
+        }
+        E e=(E) prv.element;
+        prv.next=prv.next.next;
+        return e;
+    }
+
+    public E get(int index){//获取对应位置元素
+        if(index<0||index>size){
+            throw new IndexOutOfBoundsException("删除位置非法");
+        }
+        Node<E> n=head;
+        while(index-->=0){
+            n=n.next;
+        }
+        return n.element;
+    }
+    @Override
+    public String toString(){//重写toString方法（System.out.print会调用toString方法），可以直接用System.out.print直接打印数组
+        StringBuilder builder=new StringBuilder();
+        Node<E> n=head.next;
+        while(n!=null){
+            builder.append(n.element).append(" ");
+            n=n.next;
+        }
+        return builder.toString();
+    }
+}
+
+```
+
+
+
 ### 栈：
+
+特殊的线性表
+
+只能在表尾进行操作
+
+**pop：出栈**
+
+**push：入栈**
+
+~~(这是用链表实现的栈)~~
+
+```java
+public class Stack<E> {
+    private Node<E> head=new Node<>(null);
+
+    public void push(E element){//加入
+        Node<E> n=new Node<>(element);
+        n.next=head.next;
+        head.next=n;
+    }
+    public E pop(){//删除
+        if(isEmpty()){
+            throw  new IndexOutOfBoundsException("栈已经为空，不可再删除");
+        }
+        E e=head.next.element;
+        head.next=head.next.next;
+        return e;
+    }
+    public boolean isEmpty(){//判断栈是否为空
+        return head.next==null;
+    }
+    private class Node<E>{
+        private E element;
+        private Node<E> next;
+        private Node(E e){
+            this.element=e;
+        }
+    }
+}
+
+```
 
 ### 队列：
 
@@ -1708,4 +1835,3 @@ public class Main {
 ### 红黑树：
 
 ## 哈希表
-
