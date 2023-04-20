@@ -1796,6 +1796,13 @@ public class LinkList <E>{
 ```java
 public class Stack<E> {
     private Node<E> head=new Node<>(null);
+    private class Node<E>{
+        private E element;
+        private Node<E> next;
+        private Node(E e){
+            this.element=e;
+        }
+    }
 
     public void push(E element){//加入
         Node<E> n=new Node<>(element);
@@ -1813,25 +1820,227 @@ public class Stack<E> {
     public boolean isEmpty(){//判断栈是否为空
         return head.next==null;
     }
-    private class Node<E>{
-        private E element;
-        private Node<E> next;
-        private Node(E e){
-            this.element=e;
-        }
-    }
+    
 }
 
 ```
 
 ### 队列：
 
+~~特殊线性表+1~~
+
+**队尾插入**
+
+**队首出队**
+
+```java
+public class Queue <E>{
+    private Node head=new Node<>(null);
+
+    private class Node<E>{
+        private E element;
+        private Node<E> next;
+        private Node(E e){
+            this.element=e;
+        }
+
+    }
+
+    public void offer(E element){//入队
+        Node<E> end=head;
+        while(end.next==null){
+            end=end.next;
+        }
+
+        Node<E> n=new Node<>(element);
+        end.next=n;
+    }
+
+    public E poll(){//出队
+        if(isEmpty()){
+            throw new IndexOutOfBoundsException("队列以空，不可执行出队操作");
+        }
+        E e =(E)head.next.element;
+        head.next=head.next.next;
+        return e;
+    }
+
+    public E peek(){//仅获取队首元素
+        if(isEmpty()){
+            throw new IndexOutOfBoundsException("队列以空，不可执行出队操作");
+        }
+        return (E)head.next.element;
+    }
+
+    public boolean isEmpty(){
+        return head.next==null;
+    }
+}
+```
+
+
+
 ## 树
+
+
 
 ### 二叉树：
 
+```java
+public class Main {
+    public static void main(String[] args){
+        TreeNode<Integer> a=new TreeNode<>(1);
+        TreeNode<Integer> b=new TreeNode<>(2);
+        TreeNode<Integer> c=new TreeNode<>(3);
+        TreeNode<Integer> d=new TreeNode<>(4);
+        TreeNode<Integer> e=new TreeNode<>(5);
+        a.left=b;
+        a.right=c;
+        b.left=d;
+        b.right=e;
+        System.out.println(a.left.left.element);
+    }
+
+    public static class TreeNode<E>{
+        public E element;
+        public TreeNode<E> left,right;
+        public TreeNode(E e){
+            this.element=e;
+        }
+    }
+
+```
+
+### 二叉树的遍历
+
+前序：
+
+中->左->右
+
+中序
+
+后序
+
+层序:用队列完成
+
+```java
+import com.test.empty.LinkQueue;
+
+
+public class Main {
+    public static void main(String[] args){
+        TreeNode<Integer> a=new TreeNode<>(1);
+        TreeNode<Integer> b=new TreeNode<>(2);
+        TreeNode<Integer> c=new TreeNode<>(3);
+        TreeNode<Integer> d=new TreeNode<>(4);
+        TreeNode<Integer> e=new TreeNode<>(5);
+        a.left=b;
+        a.right=c;
+        b.left=d;
+        b.right=e;
+
+        pre(a);
+        System.out.println("");
+        mid(a);
+        System.out.println("");
+        aft(a);
+        System.out.println("");
+        levelOrder(a);
+    }
+
+    public static void pre(TreeNode<Integer> root){//前序
+        if(root==null) return ;
+        System.out.print(root.element+" ");
+        pre(root.left);
+        pre(root.right);
+
+    }
+
+    public static void mid(TreeNode<Integer> root){//中序
+        if(root==null) return ;
+        mid(root.left);
+        System.out.print(root.element+" ");
+        mid(root.right);
+    }
+
+    public static void aft(TreeNode<Integer> root){//后序
+        if(root==null){
+            return ;
+        }
+        aft(root.left);
+        aft(root.right);
+        System.out.print(root.element+" ");
+    }
+
+    public static void levelOrder(TreeNode<Integer> root){
+        LinkQueue<TreeNode<Integer>>  q=new LinkQueue<>();
+        q.offer(root);
+        while(!q.isEmpty()){//队列不空，则不断取出来
+            TreeNode<Integer> node=q.poll();
+            System.out.print(node.element);//打印
+            if(node.left!=null) q.offer(node.left);//左右孩子不空则入队
+            if(node.right!=null) q.offer(node.right);
+        }
+    }
+
+    public static class TreeNode<E>{
+        public E element;
+        public TreeNode<E> left,right;
+        public TreeNode(E e){
+            this.element=e;
+        }
+    }
+}
+
+public class LinkQueue <E>  {//层序遍历使用的队列
+    private Node<E> head=new Node<>(null);
+    public class Node<E>{
+        E element;
+        Node<E> next;
+        public Node(E e){
+            this.element=e;
+        }
+    }
+
+    public void offer(E element){//入队
+        Node<E> end=head;
+        while(end.next!=null);
+        end=end.next;
+        Node<E> n=new Node<>(element);
+        end.next=n;
+    }
+
+    public E poll(){
+        if(isEmpty()){
+            throw  new IndexOutOfBoundsException("队列以空");
+        }
+        E e=head.next.element;
+        head.next=head.next.next;
+        return e;
+    }
+
+    public boolean isEmpty(){
+        return head.next==null;
+    }
+}
+
+```
+
+
+
 ### 二叉查找树和平衡二叉树：
+
+#### 二叉查找树：
+
+二叉搜索树
+
+左子树所有节点的值均小于其根节点的值
+
+右子树所有节点的值均大于其根节点的值
+
+二叉搜索树的子树也是二叉搜索树
 
 ### 红黑树：
 
 ## 哈希表
+
