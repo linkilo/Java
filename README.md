@@ -1312,7 +1312,7 @@ public class Main {
 
 通过Supplier里的get方法，制造出了一个学生制造器，当我们想得到一个新的学生对象时，直接可以调用Supplier里的get 方法 get一个新对象
 
-### Consumer消费型函数式接口
+### Consumer消费型函数式接口(还需加强理解)
 
 这个接口专门用于消费某个对象
 
@@ -2040,7 +2040,449 @@ public class LinkQueue <E>  {//层序遍历使用的队列
 
 二叉搜索树的子树也是二叉搜索树
 
+#### 平衡二叉树
+
+平衡二叉一定是一棵二叉查找树
+
+任意节点的左右子树也是一平衡二叉树
+
+**从根节点开始，左右子树的高度差不能超过1，否则视为不平衡**
+
+这些性质规定了平衡二叉树需要保持高度的平衡，这样查找效率不会降低。
+
+二叉树的节点的左子树高度减去右子树高度的结果为该节点的平衡因子。
+
+通过平衡因子，可以快速判断是否失衡（是否超过1）
+
+~~待补充~~
+
 ### 红黑树：
+
+红黑树是二叉查找树的一种
+
+~~待补充~~~
 
 ## 哈希表
 
+散列（Hashing）通过散列函数（哈希函数）将要参与检索的数据与散列值（哈希值）关联起来。
+
+现在我们需要将一对数据保存起来，这些数据会通过哈希函数计算，得到与其对应的哈希值，下次
+
+要去查找这些数据时，只需要再次计算哈希值就可以快速找到对应的元素。
+
+保存的数据是无序的
+
+~~待补充~~
+
+# 集合类与IO
+
+## 集合类：
+
+**非常重要**
+
+集合和数组一样，可以表示同样的一组元素
+
+### 集合根接口
+
+Collection：提供了各种操作
+
+```java
+public interface Collection<E> extends Iterable<E> {
+	//-----以下是查询相关的操作
+    
+    //获取当前集合中的元素数量
+    int size();
+    
+    //查看当前集合是否为空
+    boolean isEmpty();
+    
+    //擦护心当前集合中是否包含某个元素
+    boolean contains(Object o);
+    
+    //返回当前集合的迭代器
+    Iterator<E> iterator();
+    
+    //将集合转化为数组的形式
+    Object[] toArray();
+    
+    //支持范型的数组转化，同上
+    <T> T[] toArray(T[] a);
+    
+    //——----以下是修改相关的操作
+    
+    //向集合添加元素，不同的集合类具体实现可能会对插入的元素有要求
+    boolean add(E e);
+    //这个操作并不是一定会添加成功，成功添加会返回true，失败返回false
+    
+    //从集合中移除某个元素，成功返回true，失败false
+    boolean remove(Object o);
+    
+    
+    //----以下是批量执行的操作
+    
+    //查询当前集合是否包含给定集合的所有元素(给定集合是否为当期集合的子集)
+    //求子集
+    boolean containsAll(Collection<?> c);
+    
+    //添加给定集合的所有元素
+    //求并集
+    //成功返回true ，失败返回false
+    boolean addAll(Collections<? extends E> c);
+    
+    //移除给定集合的所有元素，如果有元素在当前集合不存在则忽略这个元素
+    //成功返回true,失败返回false
+    //求差集
+    boolean removeAll(Collection<?> c);
+    
+    //根据给定的Predicate条件进行元素移除
+    dafault boolean removeIf(Predicate<? super E> filter){
+        Objects.requireNonNull(filter);
+        boolean removed =false;
+        final Iterator<E> each = iterator();
+        while(each.hasNext()){
+            if(filter.test(each.next())){
+                each.remove();
+                removed=true;
+            }
+        }
+    }
+    
+    
+    //只保留当前集合中在给定集合中出现的元素，其他元素移除，成功返回true，失败返回false
+    //求交集
+    boolean retainAll(Collection<?> c);
+    
+    //清空整个集合
+    void clear();
+    
+    
+    //----以下是比较以及哈希计算相关的操作
+    
+    //判断两个集合是否相等
+    boolean equals(Object o);
+    
+    //计算当前整个集合对象的哈希值
+    int hashCode();
+    
+    //与迭代器作用相同，但是是并行执行的（多线程）
+    @Override
+    default Spliterator<E> spliterator(){
+        return Spliterator.spliterator(this,0);
+    }
+    
+    //生成当前集合的流
+    default Stream<E> stream(){
+        return StreamSupport.stream(spliterator(),false);
+    } 
+    
+    //生成当前集合的并行流（多线程）
+   	default Stream<E> parallelStream(){
+        return StreamSupport.stream(spliterator(),true);
+    }
+
+}
+```
+
+**无论是哪个集合类都支持以上操作**
+
+### List列表
+
+List是集合类型的一个分支
+
+List列表就是线性表，功能更加强大。
+
+List：
+
+是一个有序的集合，插入元素默认插入到尾部，按顺序从前往后存放，每一个元素都有一个下标
+
+允许存在重复元素
+
+在List接口中，定义了列表类型需要支持的全部操作
+
+List直接继承于Collection接口，很多地方重新定义了Collection接口中的方法。
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class Main {
+    public static void main(String[] args){
+        //使用集合类时，一般使用它的接口(方便后续修改)
+        //顺序表
+        List<String> list = new ArrayList<>();
+        list.add(0,"AAA");
+        System.out.println(list.get(0));
+        System.out.println(list.equals("AAA"));
+        System.out.println(list.contains("AAA"));
+        System.out.println(list.isEmpty());
+        Object[] arr=list.toArray();
+        System.out.println(arr[0]);
+        list.remove("AAA");
+        System.out.println(list);
+        list.add(0,"AAA");
+        list.add(0,"BBB");
+        // ...
+    }
+}
+```
+
+```java
+import java.util.LinkedList;
+import java.util.List;
+
+
+public class Main {
+    public static void main(String[] args){
+        //使用集合类时，一般使用它的接口(方便后续修改)
+        //(双向)链表
+        List<String> list = new LinkedList<>();
+        list.add("aaa");
+        list.add("bbb");
+    }
+}//待补充
+```
+
+
+
+### 迭代器(还需加深理解)
+
+```java
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args){
+        List<String> list=new LinkedList<>(Arrays.asList("a","b","c"));
+        for(int i=0;i<list.size();i++){//链表同样可以用for循环遍历
+            System.out.println(list.get(i));
+        }
+        System.out.println("");
+        //或者
+        for(String s :list){//这里使用了迭代器
+            System.out.println(s);
+        }
+        /*
+        编译后的代码是：
+          Iterator var4 = list.iterator();//迭代器
+
+        while(var4.hasNext()) {
+        //hasNext：（boolean类型）判断是否有下一个元素
+        //如果有下一个元素，就调用next方法，返回当前元素，并向下一位移动
+            String s = (String)var4.next();
+            System.out.println(s);
+        }
+        */
+    }
+}
+```
+
+因为集合类的实现方法有很多，可能是链式储存，可能是数组储存，不同实现有不同的遍历方式，而迭代器可以将多种不同的遍历方式进行同一，只需要各个集合类根据自己的情况进行对应的实现
+
+迭代器接口：
+
+```java
+public interface Iterator<E> {
+  
+    //判断是否还有下一个元素
+    boolean hasNext();
+
+	//遍历当前元素，并将下一个元素作为待遍历元素
+    E next();
+	
+    //移除上一个被遍历的元素
+    default void remove() {
+        throw new UnsupportedOperationException("remove");
+    }
+
+	//对剩下的元素进行自定义操作
+    default void forEachRemaining(Consumer<? super E> action) {
+        Objects.requireNonNull(action);
+        while (hasNext())
+            action.accept(next());
+    }
+}
+```
+
+迭代器的使用：
+
+```java
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args){
+        List<String> list=new LinkedList<>(Arrays.asList("a","b","c"));
+        Iterator<String> iterator= list.listIterator();
+        while(iterator.hasNext()){//这样遍历效率更高
+            System.out.println(iterator.next());
+        }
+    }
+}
+```
+
+**迭代器只能用一次**，还想用就必须重新去生成一个新的迭代器
+
+遍历操作还可以使用forEach（基本通用）
+
+~~其实forEach内部也是迭代器实现的~~
+
+```java
+public class Main {
+    public static void main(String[] args){
+        List<String> list=new LinkedList<>(Arrays.asList("a","b","c"));
+        list.forEach(System.out::println);
+    }
+}
+```
+
+### Queue与Deque
+
+队列接口（Queue）：
+
+#### Queue
+
+```java
+public interface Queue<E> extends Collection<E> {
+    
+    //入队，向队尾插入元素
+    //但是如果插入失败，会抛出异常
+    boolean add(E e);
+
+    //入队，同样的插入操作，但是失败不会抛出异常(一般用offer)
+    boolean offer(E e);
+
+
+    //出队，移除对首元素，队列为空会抛出异常
+    E remove();
+
+    //出队，同样移除对首元素，但是队列为空会返回null
+    E poll();
+
+    //仅获取对首元素，不进行出队操作，队列为空会抛出异常
+    E element();
+
+    //同样仅获取对首元素，但是队列为空仅返回null
+    E peek();
+}
+
+```
+
+LinkedList内一共实现了List，Deuqe,Cloneable,java.io.Serializable接口,而Deque接口继承于Queue接口，所以用Queue实现的LinkeList对象，既可以有队列的性质，也有链表的性质（可以使用队列的方法和链表的方法)
+
+可以直接将LinkedList当做一共队列来使用（比较方便，精简）
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Queue<String> queue=new LinkedList<>();//Queue实现的LinkedList对象
+        queue.offer("a");
+        queue.offer("b");
+        queue.offer("c");
+        while(!queue.isEmpty()){
+            System.out.println(queue.poll());
+        }
+    }
+
+
+}
+```
+
+#### Deque
+
+双端队列
+
+两端都可以出队，入队**（可以当做栈和普通队列用）**
+
+```java
+public interface Deque<E> extends Queue<E> {
+    
+    //对首入队（失败抛出异常）
+    void addFirst(E e);
+
+    //队尾入队
+    void addLast(E e);
+
+    //对首入队（失败不抛出异常）
+    boolean offerFirst(E e);
+
+    //队尾入队
+    boolean offerLast(E e);
+
+    //对首出队（失败抛出异常）
+    E removeFirst();
+
+    //队尾出队
+    E removeLast();
+
+    //对首出队（失败返回null）
+    E pollFirst();
+    
+    //队尾出队
+    E pollLast();
+
+    //获取对首元素(有出队操作)
+    E getFirst();
+
+    //获取队尾元素
+    E getLast();
+
+    //获取对首元素（不出队）
+    E peekFirst();
+
+    //获取队尾元素
+    E peekLast();
+
+   	//从队列中删除第一个出现的指定元素
+    boolean removeFirstOccurrence(Object o);
+
+    //从队列中删除最后一个出现的指定元素
+    boolean removeLastOccurrence(Object o);
+
+    //--------------------------------------------------------//
+    //和继承的Queue一样的方法
+    boolean add(E e);
+
+    boolean offer(E e);
+    
+    E remove();
+
+    E poll();
+
+    E element();
+    
+    E peek();
+
+    boolean addAll(Collection<? extends E> c);
+    //-------------------------------------------------------//
+
+    //------------------------------------------------------//
+    //继承自栈的方法
+    
+    //入栈
+    void push(E e);
+
+   //出栈
+    E pop();
+
+
+    boolean remove(Object o);
+
+    
+    boolean contains(Object o);
+
+    int size();
+
+    Iterator<E> iterator();
+
+
+    Iterator<E> descendingIterator();
+
+}
+
+```
