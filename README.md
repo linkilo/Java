@@ -1,7 +1,11 @@
 **0.o**    
+
 **o.0**  
+
 **Java is a piece of shit**   
+
 **0.o**
+
 **o.0**
 
 # Java 基础语法
@@ -2076,7 +2080,7 @@ public class LinkQueue <E>  {//层序遍历使用的队列
 
 # 集合类与IO
 
-## 集合类：
+## 集合类（Collection）：
 
 **非常重要**
 
@@ -2486,3 +2490,281 @@ public interface Deque<E> extends Queue<E> {
 }
 
 ```
+
+
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+       Deque<String> stack=new LinkedList<>();
+       stack.push("a");
+       stack.push("b");
+        System.out.println(stack);
+
+       Queue<Integer> queue=new PriorityQueue<>();//优先队列
+        queue.offer(1);
+        queue.offer(0);
+        queue.offer(9);
+        queue.offer(8);
+        queue.offer(6);
+        System.out.println(queue);
+    }
+}
+```
+
+### Set集合
+
+**不允许重复元素**
+
+**不支持随机访问**
+
+```java
+package java.util;
+
+public interface Set<E> extends Collection<E> {
+   
+    int size();
+
+    boolean isEmpty();
+
+    //是否包含某些元素
+    boolean contains(Object o);
+
+    Iterator<E> iterator();
+
+    Object[] toArray();
+
+    <T> T[] toArray(T[] a);
+
+
+    //添加，只有在当前集合中不存在该元素才会添加成功
+    boolean add(E e);
+
+
+    //删除指定元素
+    boolean remove(Object o);
+
+    
+
+    boolean containsAll(Collection<?> c);
+
+    
+ 	//添加（前提是没有重复）
+    boolean addAll(Collection<? extends E> c);
+
+    boolean retainAll(Collection<?> c);
+
+  
+    boolean removeAll(Collection<?> c);
+
+  
+    void clear();
+
+    boolean equals(Object o);
+
+    int hashCode();
+
+    //多线程
+    @Override
+    default Spliterator<E> spliterator() {
+        return Spliterators.spliterator(this, Spliterator.DISTINCT);
+    }
+
+
+```
+
+#### HashSet
+
+底层哈希表实现
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Set<String> set=new HashSet<>();//因为HashSet不支持随机访问，所以存放元素位置不一定是插入顺序
+        set.add("b");
+        System.out.println(set.add("a"));//重复添加失败
+        set.add("c");
+        set.add("a");
+        for(String s:set){
+            System.out.println(s);
+        }//a b c
+        //LinkedHashSet 则可以维护顺序，与插入顺序相同
+        Set<String> set1=new LinkedHashSet<>();
+        set1.add("b");
+        set1.add("c");
+        set1.add("a");
+        System.out.println(set1);
+		// b c a
+        
+         //TreeSet 则可以对插入的元素进行排序
+            Set<Integer> set2=new TreeSet<>();//从小到大排
+            set2.add(2);
+            set2.add(3);
+            set2.add(1);
+            System.out.println(set2);// 1 2 3
+        Set<Integer> set2=new TreeSet<>((a,b) ->b-a);//从大到小排
+    }
+}
+```
+
+
+
+### Map映射
+
+1-> a
+
+2-> b
+
+3-> c
+
+..-> ..
+
+..-> ..
+
+**一对一匹配，键不允许重复**
+
+这些映射关系称为键值对
+
+```java
+public interface Map<K,V> {//K :键的类型   V:值的类型
+    //--------------
+    //查询操作
+    
+    //获取当前储存的键值对数量
+    int size();
+    
+    //是否为空
+    boolean isEmpty();
+    
+    //查看Map中是否包含指定键
+    boolean containsKey(Object key);
+    
+    //查看Map中是否包含指定值
+    boolean containsValue(Object value);
+    
+    //通过给定的键，返回其映射的值
+    V get(Object key);
+    
+    
+    //-------------
+   	//修改操作
+    
+    //向Map中添加新的映射关系，新的键值对
+    V put(K key, V value);
+    
+    //根据给定的键，移除其映射关系，移除对应的键值对
+    V remove(Object key);
+    
+    
+    //------------
+    //批量操作
+    
+    //将另一个Map中的所有键值对添加到当前的Map中
+     void putAll(Map<? extends k, ? extends V> m);
+    
+    //清空整个Map
+    void clear();
+    
+    //-----------
+    //视图操作
+    
+    //以Set的形式返回Map中存放的所有键
+    Set<k> keySet();
+    
+    //将Map中所有的的value返回
+    Collection<V> values();
+    
+    //返回所有的键值对(用内部类Entry表示)
+    Set<Map.Entry<K,V>> entrySet();
+    
+    interface Entry<K, V> {//内部（类）接口Entry
+       
+        // 获取键值对的键
+        K getKey();
+
+        // 获取键值对的值
+        V getValue();
+
+       //修改键值对的值
+        V setValue(V value);
+
+        //判断两个键值对是否相等
+        boolean equals(Object o);
+
+       
+        int hashCode();
+
+       
+        public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K, V>> comparingByKey() {
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> c1.getKey().compareTo(c2.getKey());
+        }
+
+       
+        public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> comparingByValue() {
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> c1.getValue().compareTo(c2.getValue());
+        }
+
+      
+        public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(Comparator<? super K> cmp) {
+            Objects.requireNonNull(cmp);
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> cmp.compare(c1.getKey(), c2.getKey());
+        }
+
+       
+        public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(Comparator<? super V> cmp) {
+            Objects.requireNonNull(cmp);
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> cmp.compare(c1.getValue(), c2.getValue());
+        }
+
+       
+        @SuppressWarnings("unchecked")
+        public static <K, V> Map.Entry<K, V> copyOf(Map.Entry<? extends K, ? extends V> e) {
+            Objects.requireNonNull(e);
+            if (e instanceof KeyValueHolder) {
+                return (Map.Entry<K, V>) e;
+            } else {
+                return Map.entry(e.getKey(), e.getValue());
+            }
+        }
+    }
+}
+```
+
+
+
+```java
+   import java.util.*;
+
+    public class Main {
+        public static void main(String[] args) {
+            Map<Integer,String> map=new HashMap<>();
+            map.put(1,"信息1");
+            map.put(2,"信息2");
+            System.out.println(map.size());
+            System.out.println(map.get(1));
+            System.out.println(map.containsKey(2));
+            map.remove(1);
+            System.out.println(map.size());//1
+            System.out.println(map.containsKey(1));//false
+            map.put(3,"kilo");
+            System.out.println(map.keySet());
+            System.out.println(map.values());
+
+            System.out.println(map.entrySet());
+
+            map.entrySet().forEach(entry->{
+                System.out.println(entry.getKey());
+                System.out.println(entry.getValue());
+            });
+        }
+    }
+```
+
