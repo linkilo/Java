@@ -2768,3 +2768,95 @@ public interface Map<K,V> {//K :键的类型   V:值的类型
     }
 ```
 
+HashMap底层实现：
+底层采用哈希表，但是有哈希冲突问题（一个key对应多个值）
+
+此时采用连地址法可以解决该问题（将key相同的值连接成一个链表，之后可以优化成二叉搜索树）
+
+哈希表中每一个key 都对应一个没有头结点的链表
+
+关键代码：
+
+```java
+public class HashMap<k,V> extends AbstractMap<k,V> implements Map<k,v>, Cloneable, Serializable{
+    ...
+        static class Node<k,v> implements Map.Entry<k,v>{//内部使用节点，存放映射关系(键值对)
+            final int hash; //计算后的哈希值
+            final  K key; 
+            V value;
+            Node<k,v> next;//指向下一个节点
+            ...
+            
+        }
+    ...
+        
+        transient Node<k,v>[] table;//哈希表本体，头结点数组，不过HashMap中没有设计头结点（类似于没有头结点的链表）
+    final float loadFactor;//负载因子，决定HashMap扩容效果
+    
+    public HashMap(){
+        this.loadFactor = DEFAULT_LOAD_FACTOR;//创建对象是=时，会默认使用负载因子，值为：0.75
+    }
+    
+    ...
+        
+}
+```
+
+**HashMap支持自动扩容**
+
+**HashMap并不会一直使用连地址法，当链表长度达到一定限制时，会转化为效率更高的红黑树**
+
+HashMap中put方法：
+
+```java
+public V put(K key, V value) {
+    	//hash（key）：计算哈希值
+    	//计算哈希值后，调用另一个方法进行映射关系存放
+        return putVal(hash(key), key, value, false, true);
+    }
+
+    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+        Node<K,V>[] tab; Node<K,V> p; int n, i;
+        if ((tab = table) == null || (n = tab.length) == 0)//如果底层哈希表没有初始化，先初始化
+            n = (tab = resize()).length;//通过resize方法初始化底层哈希表，初始容量为16，后序会更具情况自动扩容，底层哈希表的长度永远数2的n次方
+        if ((p = tab[i = (n - 1) & hash]) == null)//因为hash值可能会很大，这里进行取余操作  （n-1）&hash等价于hash%n 这里的i就是得到的最终下标位置
+            tab[i] = newNode(hash, key, value, null);//如果这个位置上什么都没有，就直接放一个新的节点
+        else {//如果这个位置上有其他值，就是hash冲突了
+            Node<K,V> e; K k;
+            if (p.hash == hash &&
+                ((k = p.key) == key || (key != null && key.equals(k))))
+                 e = p;//如果第一个节点的键的hash值相同，进行覆盖，将插入节点等于冲突节点，将其覆盖
+            else if (p instanceof TreeNode)
+                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+            else {
+                for (int binCount = 0; ; ++binCount) {
+                    if ((e = p.next) == null) {
+                        p.next = newNode(hash, key, value, null);
+                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    }
+                    if (e.hash == hash &&
+                        ((k = e.key) == key || (key != null && key.equals(k))))
+                        break;
+                    p = e;
+                }
+            }
+            if (e != null) { // existing mapping for key
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+                afterNodeAccess(e);
+                return oldValue;
+            }
+        }
+        ++modCount;
+        if (++size > threshold)
+            resize();
+        afterNodeInsertion(evict);
+        return null;
+    }
+
+```
+
