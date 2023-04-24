@@ -2827,23 +2827,24 @@ public V put(K key, V value) {
             if (p.hash == hash &&
                 ((k = p.key) == key || (key != null && key.equals(k))))
                  e = p;//如果第一个节点的键的hash值相同，进行覆盖，将插入节点等于冲突节点，将其覆盖
-            else if (p instanceof TreeNode)
-                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
-            else {
+            else if (p instanceof TreeNode)//如果p是TreeNode则表示已经是红黑树
+                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);//在红黑树插入新节点
+           
+            else {//普通链表直接在尾部插入
                 for (int binCount = 0; ; ++binCount) {
                     if ((e = p.next) == null) {
-                        p.next = newNode(hash, key, value, null);
-                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
-                            treeifyBin(tab, hash);
+                        p.next = newNode(hash, key, value, null);//找到尾部，创建新节点
+                        if (binCount >= TREEIFY_THRESHOLD - 1) 
+                            treeifyBin(tab, hash);//如果链表长度很长那么转换成红黑树
                         break;
                     }
                     if (e.hash == hash &&
                         ((k = e.key) == key || (key != null && key.equals(k))))
-                        break;
-                    p = e;
+                        break;//如果在链表向下查找的过程发现了相同的键值对，那么直接结束，覆盖原来的值
+                    p = e;//进入下一次循环
                 }
             }
-            if (e != null) { // existing mapping for key
+            if (e != null) { // 如果e不为空，说明前面有相同键的情况，其他情况e都为null
                 V oldValue = e.value;
                 if (!onlyIfAbsent || oldValue == null)
                     e.value = value;
@@ -2852,7 +2853,7 @@ public V put(K key, V value) {
             }
         }
         ++modCount;
-        if (++size > threshold)
+        if (++size > threshold)//如果size超出阈值，用resize进行扩容
             resize();
         afterNodeInsertion(evict);
         return null;
@@ -2860,3 +2861,101 @@ public V put(K key, V value) {
 
 ```
 
+LinkedHashMap可以维护插入顺序
+
+
+
+TreeMap：可以对元素进行排序（底层是二叉查找树（红黑树））
+
+
+
+HashSet（底层套用Map）
+
+
+
+LinkedHashSet（底层套用LinkedHashMap）
+
+
+
+同理 TreeSet
+
+
+
+...关于map中的方法使用待补充
+
+
+
+### Stream流：
+
+可以方便处理集合类
+
+**逻辑更加清晰***
+
+ 
+
+```java
+ import java.util.*;
+    import java.util.stream.Collectors;
+
+public class Main {
+        public static void main(String[] args) {
+            List<String> list = new ArrayList<>(Arrays.asList("aaaa","aaaa", "Sasa", "xx", "bad", "aaa", "Lmin"));
+
+            list=list.stream()
+                    .filter(str -> str.length()>3) //过滤器(不过滤条件满足的)
+                    .filter(str -> str.charAt(0)>='A'&&str.charAt(0)<='Z')
+                    .distinct()//去除重复
+                    .collect(Collectors.toList());//将剩余的元素收集起来收变回List
+            System.out.println(list);
+        }
+    }
+```
+
+
+
+```java
+ import java.util.*;
+    import java.util.stream.Collectors;
+
+public class Main {
+        public static void main(String[] args) {
+           List<Integer> list=new ArrayList<>();
+           list.add(1);
+            list.add(2);
+            list.add(3);
+            list.add(4);
+            list=list.stream()
+                    .distinct()//去重
+                    .sorted((a,b)->b-a)//排序(从大到小)
+                    .map(e->e+1) //每个元素执行加1
+                    .limit(2)//只放行前两个元素
+                    .collect(Collectors.toList());
+            System.out.println(list);
+        }
+    }
+```
+
+
+
+### Collections：工具类
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class Main {
+        public static void main(String[] args) {
+                List<Integer> list=new ArrayList<>(Arrays.asList(1,3,5,7,8,3,2));
+            System.out.println(Collections.max(list));//求最大值
+            System.out.println(Collections.min(list));
+            Collections.sort(list);//排序
+            Collections.binarySearch(list,5);//二分查找
+            Collections.emptyList();//快速生成一个空集
+            System.out.println(Collections.indexOfSubList(list, Arrays.asList(2, 3)));
+            //快速寻找子集开始位置
+            list=Collections.checkedList(list,Integer.class);//在运行时检查类型
+        }
+    }
+```
