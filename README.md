@@ -2893,8 +2893,6 @@ LinkedHashSet（底层套用LinkedHashMap）
 
 **逻辑更加清晰***
 
- 
-
 ```java
  import java.util.*;
     import java.util.stream.Collectors;
@@ -2969,6 +2967,12 @@ public class Main {
 I/O： 就是输入输出。
 
 ### 文件字节流：
+
+一个字节一个字节的读取
+
+（一个英文占一个字节，一个中文占3个字节）
+
+#### 输入流：
 
 通过FileInputStream获取文件的输入流
 
@@ -3050,4 +3054,85 @@ public class Main {
     }
 }
 ```
+
+用byte数组读取（效率更高）：
+
+```java
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+
+         try(FileInputStream stream=new FileInputStream("文件名")){
+             stream.skip(2);//跳过前两个字节
+             byte[] bytes=new byte[stream.available()];//available返回文件内还有多少字节可以读取
+             while(stream.read(bytes)!=-1){
+                 System.out.println(new String(bytes));//可以将多个byte转化为String
+             }
+         }catch (IOException e){
+             e.printStackTrace();
+         }
+    }
+}
+```
+
+
+
+#### 输出流：
+
+```java
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+            try(FileOutputStream stream =new FileOutputStream("文件名（路径）")){
+                stream.write('a');//写入字符a
+                stream.write("hello world".getBytes());//写入字符串
+                stream.write("hello world".getBytes(),3,3);//从第3个开始，写3个字节
+                stream.flush();//刷新（将还未写进文件的立即写进文件）（可以不用写）
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+    }
+    /*这种写入文件是默认覆盖之前的内容，如果想在之前的内容上追加内容
+   则：
+   ry(FileOutputStream stream =new FileOutputStream("文件名",true))  在文件名后加一个true。
+   */
+}
+```
+
+拷贝：
+
+```java
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+           try(FileInputStream in=new FileInputStream("文件名（路径）");FileOutputStream out=new FileOutputStream("另一个文件")) {//在写入的文件，如果是之前没有的会默认新建一个
+               byte[] b=new byte[1024];
+               int len;
+               while((len=in.read(b))!=-1){
+                   out.write(b,0,len);
+               }
+               
+           } catch (IOException e) {
+               throw new RuntimeException(e);
+           }
+        }
+}
+```
+
+
+
+### 文件字符流：
+
+（更方便）
+
+一个字符一个字符的读取
+
+通过FileReader来读取
 
