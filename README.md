@@ -421,7 +421,7 @@ public static void main(String[args]){
 
 ### 特殊包装类
 
-~~了解？~~
+~~了解~~
 
 用于计算超大类型数字的BigInteger（没有限制）
 
@@ -1319,6 +1319,8 @@ public class Main {
 ### Consumer消费型函数式接口(还需加强理解)
 
 这个接口专门用于消费某个对象
+
+一般来说使用Consumer接口往往伴随着一些期望状态的改变或者事件的发生,例如最典型的forEach就是使用的Consumer接口，虽然没有任何的返回值，但是却向控制台输出了语句。
 
 ```java
 @FunctionalInterface
@@ -2959,3 +2961,93 @@ public class Main {
         }
     }
 ```
+
+
+
+## Java I/O
+
+I/O： 就是输入输出。
+
+### 文件字节流：
+
+通过FileInputStream获取文件的输入流
+
+```java
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+public class Main {
+        public static void main(String[] args) throws FileNotFoundException {//如果下方输入的文件路径在系统中找不到，那么系统会报错
+            //直接用这个语句可以忽略该异常（这是编译时异常，所以可以用这个方法忽略）
+            FileInputStream stream=new FileInputStream("C:\\Users\\kilok\\Desktop\\test.txt"); //文件输入流,需要一个参数（文件路径）
+        }
+    }
+```
+
+
+
+**使用一个流后，必须关闭流，否者被调用的文件会一直被占用**
+
+得到文件的流：
+
+```java
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+            FileInputStream stream=null;//初始化为空
+            //try/catch 在try里出现问题直接到catch抛出异常 最后执行finally
+            try {
+                stream=new FileInputStream("C:\\Users\\kilok\\IdeaProjects\\mjava\\src\\com\\test\\empty\\test.txt");
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);//使用try/catch来包围
+            }finally {//在finally执行关闭流操作，因为关闭流任何情况都必须执行（否则该文件会一直被占用）
+                if(stream!=null){//如果初始化失败
+                    try {
+                        stream.close();//关闭流操作
+                    }catch (IOException e){
+
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+
+            //简化写法
+            try(FileInputStream stream1=new FileInputStream("文件路径")){
+                System.out.println(stream1);
+            }catch (IOException e){
+                e.printStackTrace();
+            }//该语句在最后自动调用了close方法
+
+        }
+    }
+```
+
+
+
+```java
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+            //FIleInputStream：字节流
+            /* int i =stream.read();
+               因为read返回的是一个int，所以用一个int变量来存，之后再强制转化为所需的类型
+                System.out.println((char)i);//读一次，读一个字节，读完了返回-1；
+            */
+         try(FileInputStream stream=new FileInputStream("文件路径")){
+             int i;
+             while((i=stream.read())!=-1){
+                 System.out.println((char)i);
+             }
+         }catch (IOException e){
+             e.printStackTrace();
+         }
+    }
+}
+```
+
