@@ -3269,15 +3269,123 @@ public class Main {
 
 ## 缓冲流：
 
-内存读写速度大于硬盘读写速度
+相当于给文件流加了一个缓冲区（默认为8192个字节）
+
+硬盘读写速度低于内存读写速度，缓冲流相当于提前将一部分的硬盘的数据放到内存里（缓冲区），下次读取时如果缓冲区已经有了该部分数据，就不用在去硬盘读取，直接在缓冲区（内存）读取。同理向硬盘（外部设备）写入数据时，也是由缓冲区处理，而不是直接向外部设备写入。
+
+
+
+缓冲区在以下几个情况会将数据保存到文件中
+
+1：缓冲区已经满了
+
+2：flush方法清空缓冲区
+
+3：文件关闭（close）
+
+想要创建一个缓冲字节流，只需要将原来的流作为构造参数传入BufferedInputStream即可。
+
+```java
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args)  {
+             try(BufferedInputStream stream = new BufferedInputStream(new FileInputStream("A.txt"))){
+                     System.out.println((char) stream.read());//文件的读入和写入没有变化
+             }catch (IOException e){
+                     e.printStackTrace();
+             }
+        }
+}
+```
+
+
+
+I/O 操作一般不支持重复读取内容，而缓冲流提供了缓冲机制，一部分内容可以暂时被保存，BufferedInputStream支持reset和mark操作
+
+
+
+```java
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args)  {
+             try(BufferedInputStream stream = new BufferedInputStream(new FileInputStream("A.txt"),2)){//2是设置的缓冲区大小（不填默认为8192）
+                 stream.mark(3);//标记该位置，（如果一开始设置了缓冲区大小）括号内的数字必须大于缓冲区大小，如果为默认（没有设置）就填0
+                 //mark如果不为0，则表示之后最多读取3个字符，超过了mark会自动失效
+                 System.out.println((char)stream.read());
+                 System.out.println((char)stream.read());
+                 System.out.println((char)stream.read());
+                 stream.reset();//回到刚刚标记的位置
+                 System.out.println((char)stream.read());
+                 System.out.println((char)stream.read());
+                 System.out.println((char)stream.read());
+                 stream.mark(3);
+
+             }catch (IOException e){
+                     e.printStackTrace();
+             }
+        }
+}
+```
+
+缓冲字符流同理
+
+```java
+import java.io.*;
+
+public class Main {
+        public static void main(String[] args)  {
+        try(BufferedReader reader=new BufferedReader(new FileReader("A.txt"))){
+            System.out.println(reader.readLine());//由于有了缓冲机制，所以可以直接读取一行数据
+        }catch (IOException e){
+            e.printStackTrace();
+            }
+        }
+}
+```
 
 
 
 ## 转换流：
 
-将字符流转换为字节流
+将字节转化为字符流
 
-或者字节转化为字符流
+```java
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+public class Main {
+        public static void main(String[] args)  {
+            try(OutputStreamWriter streamWriter=new OutputStreamWriter(new FileOutputStream("A.txt"))){
+                streamWriter.write("hello world");
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+}
+```
+
+同理输入流
+
+```java
+import java.io.*;
+
+public class Main {
+        public static void main(String[] args)  {
+                try(BufferedReader reade=new BufferedReader(new InputStreamReader(new FileInputStream("A.txt")) )){
+                    System.out.println(reade.readLine());//由于外层套了BufferedReader可以直接读一行
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+        }
+}
+```
 
 
 
@@ -3285,7 +3393,162 @@ public class Main {
 
 
 
+```java
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+
+public class Main {
+        public static void main(String[] args)  {
+            System.out.println("aaaa");//系统默认打印到控制台中
+            /*可以打印到文件中
+            * */
+            //PrintStream打印流
+            try(PrintStream stream =new PrintStream(new FileOutputStream("A.txt"))){
+                stream.println("hello world!");
+                stream.printf("%d",10);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+}
+```
+
+
+
 ## 数据流和对象流：
+
+#### 数据流：
+
+DataInputStream是FilterInputStream的子类，支持基本数据类型的直接读取
+
+注意数据流写入的是二进制数据。
+
+```java
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args)  {
+                try(DataInputStream stream =new DataInputStream(new FileInputStream("A.txt"))){
+                    
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+        }
+}
+```
+
+#### 对象流：
+
+ObjectOutputStream不仅支持基本数据类型，而且通过对对象的序列化操作，以某种格式来保存对象，来支持对象的I/O（对象流不是继承于FilterInputStream）
+
+```java
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class Main {
+        public static void main(String[] args)  {
+             try(ObjectOutputStream stream =new ObjectOutputStream(new FileOutputStream("A.txt"));
+                 ObjectInputStream stream1=new ObjectInputStream(new FileInputStream("A.txt"))){
+                 List<String> list=new ArrayList<>(Arrays.asList("1","2","3"));
+                 stream.writeObject(list);//将list对象以某种新式保存在文件中
+                 Object o=stream1.readObject();
+                 System.out.println(o);
+             }catch (IOException e){
+                 e.printStackTrace();
+             } catch (ClassNotFoundException e) {
+                 throw new RuntimeException(e);
+             }
+        }
+}
+```
+
+
+
+对于自己实现的类：
+
+```java
+import java.io.*;
+
+public class Main {
+        public static void main(String[] args)  {
+             try(ObjectOutputStream stream =new ObjectOutputStream(new FileOutputStream("A.txt"));
+                 ObjectInputStream stream1=new ObjectInputStream(new FileInputStream("A.txt"))){
+                student s=new student("kilo");
+                stream.writeObject(s);
+                 System.out.println(stream1.readObject());
+             }catch (IOException e){
+                 e.printStackTrace();
+             } catch (ClassNotFoundException e) {
+                 throw new RuntimeException(e);
+             }
+        }
+
+        static class student implements Serializable{//序列化，只有继承了这个接口，才能用对象流将该类的对象保存在文件中
+            String name;
+            public student(String name){
+                this.name=name;
+            }
+
+            @Override
+            public String toString() {
+                return "student{" +
+                        "name='" + name + '\'' +
+                        '}';
+            }
+        }
+}
+```
+
+在后序对自己的类进行修改时，会使得这个类的结构发生改变，而原来保存的数据只适用于之前的版本，因此我们需要一种方法来区分不同的版本。
+
+可以给我们自己的类添加：
+
+```java
+private static final long serialVersionUID=123456;
+//在序列化时会被自动添加该属性，它代表当前类的版本，我们也可以手动指定版本
+```
+
+如果想让某个变量不被序列化(保存在文件中) 在变量之前加上transient
+
+```java
+import java.io.*;
+
+public class Main {
+        public static void main(String[] args)  {
+             try(ObjectOutputStream stream =new ObjectOutputStream(new FileOutputStream("A.txt"));
+                 ObjectInputStream stream1=new ObjectInputStream(new FileInputStream("A.txt"))){
+                 System.out.println(stream1.readObject());
+             }catch (IOException e){
+                 e.printStackTrace();
+             } catch (ClassNotFoundException e) {
+                 throw new RuntimeException(e);
+             }
+        }
+
+        static class student implements Serializable{//序列化，只有继承了这个接口，才能用对象流将该类的对象保存在文件中
+            private static final long serialVersionUID =123456;
+
+            String name;
+            transient int age;//该变量不会被序列化
+            public student(String name,int age){
+                this.name=name;
+                this.age=age;
+            }
+
+            @Override
+            public String toString() {
+                return "student{" +
+                        "name='" + name + '\'' +
+                        '}';
+            }
+        }
+}
+```
 
 
 
