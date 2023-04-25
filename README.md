@@ -3136,3 +3136,158 @@ public class Main {
 
 通过FileReader来读取
 
+**读取**
+
+```java
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+            try(FileReader reader= new FileReader("文件名")){
+                System.out.println((char) reader.read());
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+}
+```
+
+**输出**
+
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+                try(FileWriter writer =new FileWriter("文件名")){
+                        writer.write("hello world");
+                        writer.write('a');
+                        writer.append("  he")
+                                .append("llo");
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+        }
+}
+```
+
+
+
+**拷贝**
+
+```java
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) {
+                try(FileWriter writer =new FileWriter("A.txt");
+                    FileReader reader =new FileReader("文件名")){
+                    char[] chars=new char[3];
+                    int len;
+                    while((len=reader.read(chars))!=-1){
+                        writer.write(chars,0,len);
+                    }
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+        }
+}
+```
+
+## 文件对象：
+
+
+
+```java
+import java.io.File;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args) throws IOException {
+            File file=new File("A.txt");//文件路径
+            System.out.println(file.exists());//判断文件是否存在
+            System.out.println(file.getAbsoluteFile());//获取文件绝对路径
+            System.out.println(file.length());//获取文件内字节数
+            System.out.println(file.canRead());//是否可读
+
+            // System.out.println(file.createNewFile()); 假如该文件不存在可以用该方法创建一个该文件
+            File file1=new File("lin");
+            System.out.println(file1.mkdir());//创建文件夹
+            File file2=new File("lin/test.txt");
+            System.out.println(file2.createNewFile());//在刚刚新建的文件夹里新建一个txt文件
+            //如果没有这个lin文件夹，系统会报错，只有文件夹存在才可以新建问价
+            /*
+            * 如果lin文件夹不存在 则可以用 file2.mkdirs() 可以直接将不存在的文件夹一起创建出来
+            * */
+
+            File file3=new File("/");//C盘 idea在c盘，所以是c盘的路径
+            System.out.println(file3.getFreeSpace()/1024/1024/1024+"G");//获取剩余内存大小（只有151G了（悲））
+
+            File file4 =new File(".");//只写 . 表示当前路径
+            for(String s: file4.list()){//获取当前路径下的所有文件
+                System.out.println(s);
+            }
+        }
+}
+```
+
+
+
+**拷贝视频文件尽量用字节流**：
+
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[] args)  {
+                File file=new File("视频文件1.mp4");
+                try(FileInputStream in =new FileInputStream("视频文件1.mp4");
+                    FileOutputStream out=new FileOutputStream("视频文件2.mp4")){
+                    byte[] bytes=new byte[1024*1024];
+                    int len;
+                    long t=file.length();
+                    long sum=0;
+                    while((len=in.read(bytes))!=-1){
+                        out.write(bytes,0,len);
+                        sum+=len;
+                        System.out.println("文件已拷贝"+(double)(sum*100/t)+"%");//拷贝进度
+                    }
+
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+        }
+}
+```
+
+## 缓冲流：
+
+内存读写速度大于硬盘读写速度
+
+
+
+## 转换流：
+
+将字符流转换为字节流
+
+或者字节转化为字符流
+
+
+
+## 打印流：
+
+
+
+## 数据流和对象流：
+
+
+
+# 多线程：
+
