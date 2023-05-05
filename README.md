@@ -482,5 +482,141 @@ mysql> select count(name ) from student where name like '小%';
 
 
 
+limit 限制查询行数
+
+````mysql
+mysql> select name from student limit 3;
+````
+
+只查询前3行的学生数据
+
+```mysql
+mysql> select name from student limit 0,3;
+```
+
+从第0行开始查询3行
+
+```mysql
+mysql> select name from student limit 3,3;
+```
+
+从第3行开始查询3行
+
+这样做limit可以达到分页的效果，
+
+
+
 sum: 求一列（属性）的和（必须是数字）
 
+avg:平均值
+
+max/min：最大最小
+
+**多表查询**
+
+
+
+```mysql
+mysql> select * from student,teacher;
+```
+
+这样同时查询老师和学生的表，得到的是两张表的笛卡尔积（每一个学生和老师都有一一对应的关系）
+
+同样可以再后面加上where 来限制查询条件
+
+
+
+```mysql
+mysql> select * from student,teacher where teacher.tea_id=1;
+```
+
+这样只会查询教师编号为1的教师
+
+
+
+**自身连接查询：**
+
+```mysql
+mysql> select t1.name from student t1,student t2 where t1.stu_id=t2.stu_id;
+```
+
+
+
+**外连接查询**
+
+专门用于联合数据查询
+
+假如有两张表，一个是学生的大致信息，一个是学生的详细信息，可以通过 inner join 将两张表联合起来。
+
+```mysql
+mysql> select * from student inner join teach on student.stu_id=teach.stu_id;
+```
+
+inner join 查询两张表有交集的部分。
+
+left join 如果左边有的数据右边没有则右边没有的数据用null代替
+
+```mysql
+ select * from student left join teach on student.stu_id=teach.stu_id;
+```
+
+同理right join。
+
+通过这种方法可以查询多张表的数据
+
+```mysql
+mysql> select * from student t1 left join teach t2 on t1.stu_id=t2.stu_id left join teacher t3 on t3.tea_id=t2.tea_id;
+```
+
+
+
+```mysql
+mysql> select * from student t1 left join teach t2 on t1.stu_id=t2.stu_id left join teacher t3 on t3.tea_id=t2.tea_id
+    -> where t3.tea_id=1;
+```
+
+查询教师编号为1的学生对哪些学生授课
+
+
+
+**嵌套查询**
+
+将查询的结果作为另一个查询的条件
+
+通过select 嵌套
+
+```mysql
+mysql> select * from student where stu_id in (select stu_id from teach where tea_id in (select tea_id from teacher where tea_id=1));
+```
+
+查询教师编号为1的教师所授课的学生。
+
+同理：
+
+```mysql
+mysql> select * from student t1 left join teach t2 on t1.stu_id=t2.stu_id where t2.tea_id = (select tea_id from teacher where tea_id=1);
+```
+
+所以说嵌套和外联结是相通的
+
+### 数据库控制语言（DCL）
+
+通过更多的用户来管理整个数据库
+
+**创建用户：**
+
+create user 用户名 identified by 密码
+
+或者不带密码
+
+create user 用户名
+
+新建后再cmd（命令提示符）登录
+
+设置的用户可以看见的数据库：
+
+![image-20230505175805376](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230505175805376.png)
+
+而root用户可以看见的数据库：
+
+![image-20230505175829030](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230505175829030.png)
