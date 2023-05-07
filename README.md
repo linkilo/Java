@@ -1,4 +1,4 @@
-# 数据库(MySQL)
+# 数据库基础(MySQL)
 
 数据库是数据管理的有效技术，是由一批数据构成的有序集合，这些数据被存放在结构化的数据表里。数据表之间相互关联，反映客观事物间的本质联系。数据库能够有效的帮助一个组织或企业科学地管理各类信息资源。
 
@@ -620,3 +620,294 @@ create user 用户名
 而root用户可以看见的数据库：
 
 ![image-20230505175829030](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230505175829030.png)
+
+通过grant给用户授权
+
+grant all (权限1，权限2...)（列1，列2...） on 数据库.表 to 用户 with grant option（ with grant option 可以使该用户可以授予其他用户权限）
+
+![image-20230506112644432](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506112644432.png)
+
+all 是所以权限
+
+![image-20230506113125087](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506113125087.png)
+
+授予用户对student中的name属性有select和update权限
+
+![image-20230506113445868](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506113445868.png)
+
+![image-20230506113457264](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506113457264.png)
+
+
+
+revoke回收权限
+
+revoke all (权限1，...) (列1...) on数据库.表 from 用户
+
+![image-20230506112854039](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506112854039.png)
+
+## 视图
+
+视图本身是一个查询结果，是一张不存在的虚表。
+
+视图将select查询保存起来。
+
+视图可以当做一张表来操作
+
+
+
+通过 create view 视图名称 as 子查询语句  with check option
+
+```mysql
+mysql> create view test as select * from student where sex='男' with check option;
+```
+
+创建一个名为‘’test‘ 的视图，储存性别为男的学生。
+
+```mysql
+mysql> select * from test;
+```
+
+可以直接对视图进行查询
+
+```mysql
+mysql> update test set name ='小刚' where name ='小强';
+```
+
+可以直接对视图进行更新，但是更新结果会直接影响到原表
+
+with check option 会对之前的限定条件进行检查（where后的限定条件），即不能对限定的条件进行更新。
+
+![image-20230506165952393](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506165952393.png)
+
+**drop view 视图名 删除**
+
+**如果视图是有两个以上的表导出（或者视图的字段来自集函数，**
+
+**或视图定义有GROUP BY 语句，**
+
+**或视图含有DISTINCT短语），则该视图不允许更新**
+
+**一个从不允许更新的视图定义的视图也不允许更新**
+
+## 索引
+
+当数据量非常庞大的时候，通过创建所以，可以大大提高查询效率。（所以能够像hash表一样快速定位元素存放的位置）
+
+创建索引：
+
+create index 索引名称 on 表名(列名) 
+
+```mysql
+mysql> create index i on student(name);
+```
+
+
+
+查看表中的索引：
+
+show index from 表名
+
+![image-20230506172054653](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506172054653.png)
+
+
+
+删除索引：
+
+drop index 索引名称 on 表名
+
+![image-20230506172311947](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230506172311947.png)
+
+## 触发器
+
+在某种情况下会自动触发，在select/update/delete时会自动执行我们事先设定的内容，触发器通常用于检查内容的安全性（相比于直接添加约束，触发器更加安全）
+
+
+
+触发器所一幅的表称为基本表，当触发器表上发生select/update/delete等操作时，会自动生成两个临时表，（new表和old表，只能由触发器使用）
+
+比如在insert操作时，新的内容会被插入到new表中，在delete操作中，旧的内容会被移到old表中，我们仍然可以在old表中拿到已经被删除的数据，在update操作中，旧的数据会被移到old表中，新的数据会出现在new表中。
+
+create trigger 触发器名称名称 [before/after] [insert/update/delete] on 表名/视图名 for each row delete from 表名 where  条件
+
+for each row 会对每一行都生效，无论哪行执行操作都会执行触发器
+
+![image-20230507083136021](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230507083136021.png)
+
+创建一个删除的触发器，这样在删除学生信息的时候会一并将授课表中有关学生的信息一起删除，（before指在我们执行删除操作之前，触发器会先一步自动执行删除授课表里的有关学生的信息 after则指在我们执行操作之后，触发器再自动执行我们后面所设定的操作），（ where old.stu_id=teach.stu_id; 
+
+因为这里是删除操作，所以条件是old表里和授课表（teach）里的学号一样。总流程就是： 我们先执行删除一个学生的操作，然后这个学生的信息被移到了old表，之后触发器自动执行我们设定好的删除操作，而删除条件就是要删除的学生学号和old表里的学生学号一致，这样我们就达到了删除学生表里的数据且一并将授课表里相关的学生数据删除）
+
+查看触发器：
+
+show triggers 
+
+删除触发器：
+drop trigger 触发器名称
+
+触发器使用得当会使操作数据库更加方便（不用再去一个表一个表的操作）
+
+## 事务
+
+当我们要进行的操作十分多时（列如依次删除很多个表里的数据），我们就需要执行大量的SQL语句来完成，这些数据库操作语句就可以构成一个事务（只有Innodb引擎支持，可以通过show engines 来查看支持的引擎）
+
+![image-20230507091031392](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230507091031392.png)
+
+![image-20230507091042355](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230507091042355.png)
+
+
+
+事务有以下特性：
+
+**原子性：**一个事务中的所有操作，要么全部完成，要么全部未完成，不会结束在中间的某个环节。如果事务在执行过程中发生错误，会被回滚（Rollback)到事务开始前的状态（就像这个事务没有被执行过一样）。
+
+**一致性:**在事务开始之前和事务结束之后，数据库的完整性没有被破坏，这表示写入的资料必须完全符合所以的预设规则，这包含资料的精确度，串联性以及后序数据库可以自发性的完成预定的内容。
+
+**隔离性：**数据库允许多个并发事务同时对其数据进行读写和修改的能力，隔离性可以防止多个事务并发执行时由于交叉执行而导致数据不一致。事务隔离分为不同级别： 读未提交（Read uncommitted），读提交（Read committed），可重复读（repeatable read）和串行化（Serializable）
+
+**持久性：**
+
+事务处理结束后，对数据的修改就是永久的，即便系统故障也不会丢失。
+
+
+
+```mysql
+begin; #开始事务
+...
+rollback; #回滚事务
+savepoint 回滚点; #添加回滚点
+rollback to 回滚点; #回滚到指定回滚点
+...
+commit;#提交事务
+ -- 一旦提交，就再也无法进行回滚！
+```
+
+(在开始和提交事务之间是单独创建了一个back文件储存了事务中的操作，并不会立刻修改原表中的数据（隔离），只有到提交了事务之后，原表的数据才会被修改)
+
+```mysql
+mysql> begin; #开始事务
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from teach; #查询
++--------+--------+
+| stu_id | tea_id |
++--------+--------+
+|      1 |      1 |
+|      2 |      1 |
+|      3 |      1 |
+|      4 |      2 |
+|      5 |      3 |
+|      6 |      3 |
+|      7 |      3 |
+|      1 |      3 |
++--------+--------+
+8 rows in set (0.00 sec)
+
+mysql> delete  from teach where stu_id=1 ;#将学号等于1的学生删除
+Query OK, 2 rows affected (0.00 sec)
+
+mysql> select * from teach; #查询
++--------+--------+
+| stu_id | tea_id |
++--------+--------+
+|      2 |      1 |
+|      3 |      1 |
+|      4 |      2 |
+|      5 |      3 |
+|      6 |      3 |
+|      7 |      3 |
++--------+--------+
+6 rows in set (0.00 sec)
+
+mysql> rollback;#回滚
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from teach; #再次查询
++--------+--------+
+| stu_id | tea_id |
++--------+--------+
+|      1 |      1 |
+|      2 |      1 |
+|      3 |      1 |
+|      4 |      2 |
+|      5 |      3 |
+|      6 |      3 |
+|      7 |      3 |
+|      1 |      3 |
++--------+--------+
+8 rows in set (0.00 sec)
+#此时的数据已经回滚到修改之前了
+```
+
+
+
+```mysql
+mysql> begin;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from teach;
++--------+--------+
+| stu_id | tea_id |
++--------+--------+
+|      1 |      1 |
+|      2 |      1 |
+|      3 |      1 |
+|      4 |      2 |
+|      5 |      3 |
+|      6 |      3 |
+|      7 |      3 |
+|      1 |      3 |
++--------+--------+
+8 rows in set (0.00 sec)
+
+mysql> delete from teach where stu_id=1;
+Query OK, 2 rows affected (0.00 sec)
+
+mysql> select * from teach;
++--------+--------+
+| stu_id | tea_id |
++--------+--------+
+|      2 |      1 |
+|      3 |      1 |
+|      4 |      2 |
+|      5 |      3 |
+|      6 |      3 |
+|      7 |      3 |
++--------+--------+
+6 rows in set (0.00 sec)
+
+mysql> savepoint test;#创建回滚点
+Query OK, 0 rows affected (0.00 sec)
+mysql> delete from teach where stu_id=2;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from teach;
++--------+--------+
+| stu_id | tea_id |
++--------+--------+
+|      3 |      1 |
+|      4 |      2 |
+|      5 |      3 |
+|      6 |      3 |
+|      7 |      3 |
++--------+--------+
+5 rows in set (0.00 sec)
+
+mysql> rollback to test;#回滚到指定回滚点
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from teach;
++--------+--------+
+| stu_id | tea_id |
++--------+--------+
+|      2 |      1 |
+|      3 |      1 |
+|      4 |      2 |
+|      5 |      3 |
+|      6 |      3 |
+|      7 |      3 |
++--------+--------+
+6 rows in set (0.00 sec)
+
+```
+
+通过事务，可以更加安全的操作数据。
