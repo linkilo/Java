@@ -911,3 +911,30 @@ mysql> select * from teach;
 ```
 
 通过事务，可以更加安全的操作数据。
+
+# maven
+
+用于管理和构建Java项目的工具
+
+**依赖管理**：方便快捷管理项目依赖的资源（jar包），避免版本冲突问题。（不用手动从网上导入jar包）
+
+**统一项目结构**：
+
+![image-20230508100515861](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508100515861.png)
+
+可以通用各种开发工具
+
+![image-20230508100547726](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508100547726.png)
+
+pom.xml 核心配置文件
+
+**项目构建**：
+
+标准跨平台的自动化项目构建方式（window，Linux，macOS）
+
+![image-20230508100755043](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508100755043.png)
+
+![image-20230508101127282](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508101127282.png)
+
+![image-20230508101245718](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508101245718.png)
+
