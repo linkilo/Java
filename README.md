@@ -252,11 +252,690 @@ arr[1]=1,arr[10]=10,arr[5~9]=undefined
 ![image-20230508111014142](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508111014142.png)
 
 ```javascript
- <script>
+  <script>
         var a=[1,2,3,4];
         a.forEach(function(e){
+            document.write(e);
+        })
+        a.forEach((e)=>{
             document.write(e);
         })
    </script>
 ```
 
+添加：
+
+```javascript
+  <script>
+        var a=[1,2,3,4];
+        a.push(5,6,7);
+   </script>
+```
+
+删除：
+
+```javascript
+  <script>
+        var a=[1,2,3,4];
+        a.splice(2,2);//从元素2开始删除，删除2个数
+   </script>
+```
+
+
+
+![image-20230508150317001](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508150317001.png)
+
+![image-20230508150344985](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508150344985.png)
+
+字符串创建：
+
+```javascript
+<script>
+       var s= "kilo";
+       var a=new String("hello");
+   </script>
+```
+
+
+
+```javascript
+<script>
+       var s= "kilo";
+        document.write(s.charAt(0));//获得指定位置的字符
+        document.write(s.indexOf(i));//检索字符在字符串的位置
+        var a= "   ll    ";
+        a=a.trim;//去除字符串两端的空格
+        var b= s.substring(1,4);//截取s字符串从0开始到3结束
+   </script>
+```
+
+
+
+自定义对象
+
+![image-20230508150759939](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508150759939.png)
+
+```javascript
+ <script>
+        //自定义对象
+        var user = {
+            name :"kilo",
+            age:124678,
+            eat : function(){
+                alert("eeeee");
+            }
+        }
+        document.write(user.age);
+        user.eat;
+   </script>
+```
+
+
+
+![image-20230508151301216](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508151301216.png)
+
+![image-20230508151204457](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508151204457.png)
+
+
+
+![image-20230508151346754](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508151346754.png)
+
+```javascript
+<script>
+       //JSON
+        var  user = '{"name":"kilo","age":18,"addr":[a,b,c,d]}';
+   </script>
+```
+
+与自定义不同的是，JSON中的属性要用 “ ”括起来
+
+![image-20230508152812535](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508152812535.png)
+
+**BOM**
+
+![image-20230508153657568](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508153657568.png)
+
+![image-20230508153732788](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508153732788.png)
+
+```javascript
+ <script>
+        //获取
+        window.alert("hello");
+        alert("hello"); //效果一样
+
+
+        //方法
+        //confoirm - 对话框
+        confirm("是否删除此记录？")
+   </script>
+```
+
+
+
+![image-20230508154058836](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508154058836.png)
+
+confirm有一个返回值。
+
+确定：true  取消： false
+
+
+
+```javascript
+<script>
+       //方法
+       //定时器 - setInterval -- 周期性执行某函数
+       var a=0;
+       setInterval(function(){
+        a++;
+        console.log("定时器执行了"+a+"次");
+       },2000)//每隔两秒执行一次该函数
+   </script>
+```
+
+
+
+![image-20230508154558376](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230508154558376.png)
+
+```javascript
+ <script>
+       //方法
+       //定时器 - setTimeout -- 延迟指定时间执行一次
+       setTimeout(function(){
+        alert("只执行一次")
+       },2000)
+   </script>
+```
+
+**地址栏（Location）**
+
+![image-20230509152110691](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509152110691.png)
+
+**DOM**
+
+![image-20230509153935764](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509153935764.png)
+
+
+
+
+
+![image-20230509153747861](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509153747861.png)
+
+DOM树：
+
+![image-20230509153828776](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509153828776.png)
+
+![image-20230509154115207](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509154115207.png)
+
+**DOM将每一个标签都封装成了各自的对象**
+
+![image-20230509154252935](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509154252935.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-对象-DOM</title>
+    <style>
+        .cls{
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <img id="h1" src="img\20.jpg"> <br><br>
+
+    <div class="cls">Js</div> <br>
+    <div class="cls">DOM</div> <br>
+    
+    <input type="checkbox" name="test"> t1
+    <input type="checkbox" name="test"> t2
+    <input type="checkbox" name="test"> t3
+    <br><br>
+    <script>
+        //1.获取element元素
+        //1.1获取元素-根据ID获取
+        var img=document.getElementById('h1');
+        document.write(img);
+        //1.2根据标签获取
+        var divs =document.getElementsByTagName('div');
+        for(let i=0;i<divs.length;i++){
+            document.write(divs[i]);
+        }
+        //1.3根据name属性获取
+        var ins=document.getElementsByName('test');
+        for(let i=0;i<ins.length;i++){
+            document.write(ins[i]);
+        }
+        //1.4根据class属性获取
+        var divs1=document.getElementsByClassName('cls');
+        for(let i=0;i<divs1.length;i++){
+            document.write(divs1[i]);
+        }
+    </script>
+</body>
+</html>
+```
+
+
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-对象-DOM</title>
+    <style>
+        .cls{
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <img id="h1" src="img\20.jpg"> <br><br>
+
+    <div class="cls">Js</div> <br>
+    <div class="cls">DOM</div> <br>
+    
+    <input type="checkbox" name="test"> t1
+    <input type="checkbox" name="test"> t2
+    <input type="checkbox" name="test"> t3
+    <br><br>
+    <script>
+        //2改变元素
+        //改变图像
+        var img=document.getElementById('h1');
+        img.src="img\5.jpg";
+        //在div标签加上 0.0
+        var divs=document.getElementsByTagName('div');
+        for(let i=0;i<divs.length;i++){
+            const div=divs[i];
+            div.innerHTML+=" <font color='red'>0.0</font>";//将颜色修改为红色
+        }
+        //使所有的复选框呈现选中状态
+        var ins=document.getElementsByName('test');
+        for(let i=0;i<ins.length;i++){
+            const check=ins[i];
+            check.checked=true;
+        }
+    </script>
+</body>
+</html>
+```
+
+**Js事件监听**
+
+![image-20230509162711061](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509162711061.png)
+
+![image-20230509163312852](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509163312852.png)
+
+![image-20230509163550570](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509163550570.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-事件-事件绑定</title>
+</head>
+<body>
+    <input type="button" id="btn1" value="事件绑定1" onclick="on()">
+    <input type="button" id="btn2" value="事件绑定2">
+
+    <script>
+        function on(){
+            alert("按钮1被点击")
+        }
+
+        document.getElementById('btn2').onclick=function(){
+            alert("按钮2被点击")
+        }
+    </script>
+</body>
+</html>
+```
+
+![image-20230509164044685](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509164044685.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-常见事件</title>
+</head>
+<body onload="load()">
+    <form action="" style="text-align: center;" onsubmit="subfn()">
+    <input type="text" name="username" onblur="bfn()" onfocus="ffn()" onkeydown="kfn()">
+
+    <input id="b1" type="submit" value="q提交">
+
+    <input id="b1" type="button" value="单击事件" onclick="fn1()">
+    </form>
+
+    <br><br><br>
+
+    <table  width="800px" border="1" cellspacing="0" align="center" onmouseover="over()" onmouseout="out()">
+        <tr>
+            <th>学号</th>
+            <th>姓名</th>
+            <th>分数</th>
+            <th>评语</th>
+        </tr>
+
+        <tr align="center">
+            <td>001</td>
+            <td>张三</td>
+            <td>90</td>
+            <td>优秀</td>
+        </tr>
+
+        <tr align="center">
+            <td>002</td>
+            <td>李四</td>
+            <td>99</td>
+            <td>优秀</td>
+        </tr>
+    </table>
+
+    <script>
+        //onload:页面/元素加载完成触发
+        function load(){
+            console.log("页面加载完成...")
+        }
+
+        //onclick:鼠标点解事件
+        function fn1(){
+            console.log("我被点击了...")
+        }
+
+        //onblur：失去焦点事件
+        function bfn(){
+            console.log("失去焦点...")
+        }
+
+        //onfocus：元素获得焦点
+        function ffn(){
+            console.lof("获得焦点")
+        }
+    </script>
+</body>
+</html>
+```
+
+### Vue
+
+![image-20230509172309833](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509172309833.png)
+
+![image-20230509172431524](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509172431524.png)
+
+![image-20230509172532390](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509172532390.png)
+
+~~前端不想学了直接干maven~~
+
+## 后端开发
+
+### Socket技术：
+
+是计算机进行通讯的一种方式（套接字），是操作系统底层提供的一项通讯技术，支持TCP和UDP，java已经对socket底层支持进行了一套完整的封装，可以通过java来实现socket通讯。
+
+服务端：
+
+```java
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+    public static void main(String[] args){
+        try( ServerSocket server=new ServerSocket(8080);){
+            System.out.println("等待客户端连接");
+            Socket socket=server.accept();
+            System.out.println("客户端已连接，IP地址为："+socket.getInetAddress().getHostAddress());
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+客户端：
+
+```java
+import java.io.IOException;
+import java.net.Socket;
+
+public class Main {
+    public static void main(String[] args){
+        try(Socket socket=new Socket("localhost",8080)){
+            System.out.println("已连接到服务端");
+        }catch (IOException e){
+            System.out.println("服务端连接失败！");
+            e.printStackTrace();
+        }
+        }
+}
+
+```
+
+
+
+<u>**使用socket进行数据传输**</u>
+
+通过Socket对象，我们就可以获取到对应的I/O进行网络传输：
+
+服务端
+
+```java
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+    public static void main(String[] args){
+        try( ServerSocket server=new ServerSocket(8080);){
+            System.out.println("等待客户端连接");
+            Socket socket=server.accept();
+            socket.setSoTimeout(3000);//设定超时界限（超过3秒则断开连接）
+            System.out.println("客户端已连接，IP地址为："+socket.getInetAddress().getHostAddress());
+            System.out.println("读取客户端数据....");
+
+            BufferedReader  reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println(reader.readLine());
+            OutputStreamWriter writer=new OutputStreamWriter(socket.getOutputStream());
+            writer.write("数据已接收\n");
+            writer.flush();
+            socket.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+
+
+客户端
+
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args){
+        try(Socket socket=new Socket("localhost",8080); Scanner sc =new Scanner(System.in)){
+            System.out.println("已连接到服务端");
+            OutputStreamWriter writer=new OutputStreamWriter(socket.getOutputStream());
+            writer.write(sc.nextLine()+"\n");//注意要加换行符不然服务端（BufferedInputStream，一行一行的读取）无法读取
+            writer.flush();
+            socket.shutdownOutput();//手动关闭输出流（到最后系统会自动关闭）
+            System.out.println("数据已发送");
+            BufferedReader reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println(reader.readLine());
+        }catch (IOException e){
+            System.out.println("服务端连接失败！");
+            e.printStackTrace();
+        }
+        }
+}
+
+```
+
+<u>文件传输：</u>
+
+服务端
+
+```java
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+    public static void main(String[] args){
+        try(ServerSocket server=new ServerSocket(8080)){
+            Socket socket=server.accept();
+            InputStream stream=socket.getInputStream();
+            FileOutputStream fileOutputStream=new FileOutputStream("net/data.txt");
+            byte[] bytes=new byte[1024];
+            int i;
+            while((i=stream.read(bytes))!=-1){
+                fileOutputStream.write(bytes,0,i);
+            }
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+客户端：
+
+```java
+import java.io.*;
+import java.net.Socket;
+
+public class Main {
+    public static void main(String[] args) throws FileNotFoundException {
+        try(Socket socket=new Socket("localhost",8080)){
+            new File("test.txt");
+            FileInputStream fileInputStream=new FileInputStream("test.txt");
+            OutputStream stream=socket.getOutputStream();
+            byte[] bytes=new byte[1024];
+            int i;
+            while((i=fileInputStream.read(bytes))!=-1){
+                stream.write(bytes,0,i);
+            }
+            fileInputStream.close();
+            stream.flush();
+        }catch (IOException e){
+            System.out.println("服务器连接失败");
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+<u>使用浏览器访问socket服务器</u>
+服务端：
+
+```java
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+    public static void main(String[] args){
+       try(ServerSocket server=new ServerSocket(8080)){
+           System.out.println("等待客户端连接");
+           Socket socket= server.accept();
+           System.out.println("客户端以连接，ip地址为："+socket.getInetAddress().getHostAddress());
+           InputStream in=socket.getInputStream();
+           System.out.println("接受客户端数据...");
+           while(true){
+               int i=in.read();
+               if(i==-1) break;
+               System.out.print((char)i);
+           }
+       }catch (IOException e){
+           e.printStackTrace();
+       }
+    }
+}
+
+```
+
+浏览器访问：
+
+![image-20230510103046241](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230510103046241.png)
+
+此时需要我们在服务端去支持响应http请求
+
+![image-20230510103720439](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230510103720439.png)
+
+```java
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+    public static void main(String[] args){
+       try(ServerSocket server=new ServerSocket(8080)){
+           System.out.println("等待客户端连接");
+           Socket socket= server.accept();
+           System.out.println("客户端以连接，ip地址为："+socket.getInetAddress().getHostAddress());
+           /*InputStream in=socket.getInputStream();
+           System.out.println("接受客户端数据...");
+           while(true){
+               int i=in.read();
+               if(i==-1) break;
+               System.out.print((char)i);
+           }
+           */
+           OutputStreamWriter writer=new OutputStreamWriter(socket.getOutputStream());
+           writer.write("HTTP/1.1 200 Accepted\r\n"); //200是响应码，Http协议规定了200为接受请求，400为错误的请求，404为找不到资源
+           writer.write("\r\n"); //在请求头写完后还要进行一次换行，然后写入我们的响应实体（展示在浏览器上）
+           writer.write("kilo");
+           writer.flush();
+       }catch (IOException e){
+           e.printStackTrace();
+       }
+    }
+}
+
+```
+
+### JDBC
+
+JDBC（Java Data Base Connectivity）java数据库连接，它是Java编程语言和广泛数据库之间独立于数据库的连接标准的Java API，JBDC就是一种规范，所提供的接口，一套完整的，允许便捷访问底层数据库。可以用Java来编写不同类型的可执行文件：java应用程序，Java Applets，Java Servlet，JSP等，不同可执行文件都能通过JDBC访问数据库，又兼备储存的优势。简单来说，JDBC就是Java与数据库的连接的桥梁或插件，使用Java代码就能操作数据库的增删改查，储存过程，事务等。
+
+
+
+![image-20230510165633379](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230510165633379.png)
+
+
+
+使用JDBC连接数据库
+
+```java
+import java.sql.*;
+
+public class Main {
+    public static void main(String[]args){
+        //1.通过DriveManager来获得数据库连接
+        try(Connection connection= DriverManager.getConnection("数据库的URl","用户名","密码");
+            //2.创建一个用于执行SQL的statement对象
+            Statement statement=connection.createStatement()){//注意前两部都要在try中，最后要释放资源
+            //3.执行sql语句
+            ResultSet set=statement.executeQuery("select  * from student");
+            //4.查看结果
+            while(set.next()){
+                System.out.println(set.getString(1));
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        //5.释放资源
+    }
+}
+```
+
+**Drivermanager:**
+
+用于管理数据库的驱动
+
+**Connection和Statement：**
+
+Connection是数据库连接对象，可以通过连接对象来创建一个Statement用于执行SQL语句
+
+
+
+### maven
+
+管理和构建java项目的工具
+
+> **作用**
+>
+> ![image-20230509173450210](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509173450210.png)
+
+![image-20230509173546995](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509173546995.png)
+
+maven模型：
+![image-20230509173742724](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509173742724.png)
