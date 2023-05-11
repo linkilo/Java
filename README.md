@@ -925,17 +925,293 @@ public class Main {
 
 Connection是数据库连接对象，可以通过连接对象来创建一个Statement用于执行SQL语句
 
+![image-20230511080123288](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511080123288.png)
+
+Statement
+
+statement.execute可以执行SQL语句，他会返回一个boolean来表示执行结果是一个ResultSet还是一个int，我们可以通过使用getResultSet（）或者getUpdateCount（）来获取。
+
+#### 执行SQL语句：
+
+**DML**
+
+插入：
+
+```java
+import java.sql.*;
+
+public class Main {
+    public static void main(String[]args){
+        try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+       Statement statement=connect.createStatement()){//创建用于将 SQL 语句发送到数据库的 SQLServerStatement 对象。
+
+        int i = statement.executeUpdate("insert into student values(8,'小嘎','男')");//返回值是一个int（生效了几行）
+           System.out.println("生效了"+i+"行");
+
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+```
+
+同理与其他操作
+
+**DQl（查询）**
+
+![image-20230511083509989](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511083509989.png)
+
+```java
+import java.sql.*;
+
+public class Main {
+    public static void main(String[]args){
+       try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+       Statement statement=connect.createStatement()){
+           ResultSet set= statement.executeQuery("select  * from student");
+           while (set.next()){
+               System.out.println(set.getString(1));//set.get 读取第一列（第一列的属性类型是int也可以将set.getString 替换为：set.getInt）
+               System.out.println(set.getString(2));//读取第二列
+               System.out.println(set.getString(3));
+           }
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+```
+
+#### 批处理：
+
+![image-20230511084006724](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511084006724.png)
+
+和事务差不多，通过addBatch来分多条执行SQL语句最后在用executeBatch来最后提交所以的操作。
+
+```java
+import java.sql.*;
+
+public class Main {
+    public static void main(String[]args){
+       try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+       Statement statement=connect.createStatement()){
+            
+            statement.addBatch("insert into student values(9,'2','男')");
+            statement.addBatch("insert into student values(10,'2','男')");
+            statement.addBatch("insert into student values(11,'2','男')");
+            statement.addBatch("insert into student values(12,'2','男')");
+            statement.addBatch("insert into student values(13,'2','男')");
+            statement.executeBatch();
+
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+```
+
+#### 将查询结果映射为对象
+
+直接新建一个对应的Java类，列如：
+学生类：
+
+```java
+public class student {
+    int id;
+    String name;
+    String sex;
+
+    public student(int id, String name, String sex) {
+        this.id=id;
+        this.name=name;
+        this.sex=sex;
+    }
+
+    public void say(){
+        System.out.println("我叫"+name+"学号为："+id);
+    }
+}
+
+```
+
+主函数：
+
+```java
+import java.sql.*;
+
+public class Main {
+    public static void main(String[]args){
+         try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+       Statement statement=connect.createStatement()){
+           ResultSet set=statement.executeQuery("select * from student");
+           while(set.next()){
+               student student=new student(set.getInt(1),set.getString(2),set.getString(3));
+               student.say();
+           }
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+```
+
+还有一种方法使用反射，可以创建一个通用的对象（之后再补）
+
+#### 实现登录与SQL注入攻击
+
+模拟用户登录：
+
+首先要建立一个user用户表（name，pwd（密码））
+
+````java
+import java.sql.*;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[]args){
+        try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+       Statement statement=connect.createStatement()){
+           Scanner scanner=new Scanner(System.in);
+
+           ResultSet set=statement.executeQuery("select * from user where username='"+scanner.nextLine()+"'and pwd='"+scanner.nextLine()+"';");
+           while(set.next()){
+               String username= set.getString(1);
+               System.out.println("登陆成功");
+           }
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+````
+
+![image-20230511091605144](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511091605144.png)
+
+这样的写法就是一种SQL的注入攻击。
+
+那应该用什么方法来有效方法来限制这种攻击？
+
+#### PreparedStatement
+
+![image-20230511091830205](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511091830205.png)
+
+``````````java
+import java.sql.*;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[]args){
+        try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+        PreparedStatement statement=connect.prepareStatement("select * from user where username=? and pwd=?;")){
+           Scanner scanner=new Scanner(System.in);
+           statement.setString(1,scanner.nextLine());//将上面的？替换为相应的参数
+           statement.setString(2,scanner.nextLine());
+
+           ResultSet set=statement.executeQuery();
+           while(set.next()){
+               String username=set.getString(1);
+               System.out.println("登陆成功");
+           }
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+``````````
+
+有效预防SQL注入攻击
+
+#### 管理事务：
+
+![image-20230511093352801](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511093352801.png)
+
+```java
+import java.sql.*;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[]args){
+        try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+        Statement statement=connect.createStatement()){
+            connect.setAutoCommit(false);//将自动提交关闭
+
+           int i=statement.executeUpdate("delete  from student where name='2'");
+           System.out.println(i);
+           connect.commit();//手动提交（如果不手动提交那么之前的操作全部作废）
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+```
+
+利用事务可以对数据进行更加安全的操作
+
+```java
+import java.sql.*;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[]args){
+       try(Connection connect=DriverManager.getConnection("数据库URL","用户","密码");//连接数据库
+        Statement statement=connect.createStatement()){
+            connect.setAutoCommit(false);//将自动提交关闭
+
+           statement.executeUpdate("insert into user values (1,2)");
+           statement.executeUpdate("insert into user values (2,2)");
+           
+           Savepoint savepoint=connect.setSavepoint();//设置回滚点
+           statement.executeUpdate("insert into user values (3,2)");
+           statement.executeUpdate("insert into user values (4,2)");
+          connect.rollback(savepoint);//回到指定回滚点，中间操作作废
+           connect.commit();//手动提交
+       }catch (SQLException e){
+           e.printStackTrace();
+       }
+    }
+}
+```
+
+### LomBok(小辣椒)
+
+![image-20230511101403894](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511101403894.png)
+
+![image-20230511101421505](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511101421505.png)
+
+![image-20230511101443669](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511101443669.png)
 
 
-### maven
 
-管理和构建java项目的工具
+### Mybatis
 
-> **作用**
->
-> ![image-20230509173450210](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509173450210.png)
+![image-20230511102847305](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511102847305.png)
 
-![image-20230509173546995](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509173546995.png)
+#### XML：
 
-maven模型：
-![image-20230509173742724](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509173742724.png)
+![image-20230511103022870](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511103022870.png)
+
+**xml主要是存放数据**
+
+xml规范：
+
+**1.必须存在一个根节点，将所有的字标签全部包括**
+
+**2.可以但不必须包含一个头部声明（定义编码格式）**
+
+**3.所有标签碧玺成对出现，可以嵌套但是不能交叉嵌套**
+
+**4.区分大小写**
+
+**5.标签中可以存在属性，type.....**
+
+**注释： <!-- 内容-->**
+
+```xml
+<outer>
+   <name>阿伟</name>
+    <desc>阿伟又在打电动</desc>
+<!--  我是注释  -->
+</outer>
+```
+
+![image-20230511104214133](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511104214133.png)
+
