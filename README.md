@@ -1179,6 +1179,119 @@ public class Main {
 
 ![image-20230511101443669](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511101443669.png)
 
+Getter和Setter无法生成静态成员变量的方法
+
+
+
+![image-20230515100708828](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230515100708828.png)
+
+学生类：
+
+```java
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+@Getter
+@Setter
+@Accessors(chain = true)//链式调用(静态不会)
+public class student {
+    int stu_id;
+    String name;
+    String sex;
+}
+```
+
+main类
+
+```java
+public class Main {
+    public static void main(String[]args) {
+        student student=new student();
+        student
+                .setName("")
+                .setStu_id(1)
+                .setSex("man");
+    }
+}
+```
+
+**ToString**
+
+```java
+import lombok.*;
+import lombok.experimental.Accessors;
+@Getter
+@Setter
+@Accessors(chain = true)
+@ToString() //快速重写toString方法 ( @ToString （exclude "name")   exclude不包括 （将name属性排除开外）)
+public class student {
+    @ToString.Include(rank = 2 ,name = "学号")  //rank修改属性顺序，数字越大，顺序越靠前
+    int stu_id;
+    @ToString.Include(rank = 3 ,name = "姓名") //修改属性名称
+    String name;
+    @ToString.Include(rank = 1,name = "性别")
+    String sex;
+
+}
+```
+
+~~补充：label（标签）,感觉用处很大~~
+
+```java
+    public class Main {
+        public static void main(String[]args) {
+            label1:
+            for(int i=0;i<10;i++){
+                for(int j=0;j<10;j++){
+                    break label1;//直接跳出外层循环
+                }
+            }
+            label2:{
+                
+            }//同样可以给代码块定标签
+        }
+    }
+```
+
+**Builder(新建对象时，可以链式调用)**
+
+~~花里胡哨~~
+
+学生类：
+
+```java
+import lombok.*;
+@Builder
+public class Student {
+    @ToString.Include(rank = 2 ,name = "学号")  //rank修改属性顺序，数字越大，顺序越靠前
+    int stu_id;
+    @ToString.Include(rank = 3 ,name = "姓名") //修改属性名称
+    String name;
+    @ToString.Include(rank = 1,name = "性别")
+    String sex;
+
+}
+```
+
+main类：
+
+```java
+    public class Main {
+        public static void main(String[]args) {
+            Student student= Student
+                    .builder()
+                    .sex("man")
+                    .name("kkk")
+                    .stu_id(1)
+                    .build();
+
+        }
+    }
+```
+
 
 
 ### Mybatis
@@ -1214,4 +1327,369 @@ xml规范：
 ```
 
 ![image-20230511104214133](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230511104214133.png)
+
+通过xml配置mybatis
+
+注意文件名要改为：mybatis-config.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="MySQL的URL"/>
+                <property name="username" value="MySQL用户（一般是root）"/>
+                <property name="password" value="密码"/>
+            </dataSource>
+        </environment>
+    </environments>
+</configuration>
+```
+
+#### SqlsessionFactory
+
+
+
+```java
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+public class Main {
+        public static void main(String[]args) throws FileNotFoundException {
+            SqlSessionFactory sqlSessionFactory=new SqlSessionFactoryBuilder().build(new FileInputStream("mybatis-config.xml"));//这里写M配置好的mybatis的文件名（要放在同一根目录下）
+            try(SqlSession session= sqlSessionFactory.openSession(true)){ //开启自动提交 (用try结束之后就不用再手动关闭(自动调用close方法))
+                
+            }
+        }
+    }
+```
+
+![image-20230515210051531](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230515210051531.png)
+
+通过SqlSessionFactoryBuilder的builder方法创建SqlSessionFactory（SqlSession工厂）通过这个工厂可以创建多个新的对话和SqllSession对象，
+
+每个对话相当于不同地方登录一个账号去访问数据（会话之间相互隔离，没有关联）。而SQLSession可以完成数据库的所有操作，这个接口定义了大量的数据库操作方法，因此外面现在只需要一个对象就可以完成对数据库的所有操作。
+
+
+
+读取实体类：
+
+读取实体类需要一个映射规则，类中的哪个字段对应数据库的哪个字段，在查询语句返回结果后，Mybatis就会自动就对应的结果填入到对应对象的相应字段上。
+
+首先编写实体类（直接使用Lombok）
+
+在根目录下重新创建一个mapper文件夹，新建名为：TestMapper.xml 的文件作为我们的映射器
+
+(mapper里面可以写无数的SQL语句，而且不需要释放资源或者连接数据库（可以避免用JDBC而写大量的代码）)
+
+````xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DID Mapper 3.0//EN"
+        "https//mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="testMapper"> <!--namespace  区分不同mapper-->
+    <select id="selectStudent" resultType="student"> <!--resultype 返回值类型-->
+        select * from student <!--select 語句-->
+    </select>
+</mapper>
+````
+
+通过mapper可以直接使用SQL语句将查询的结果映射到对应的实体类上
+
+**操作流程**：
+
+**1 .mapper :**
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?><!--mapper 映射器，通过映射器可以快速的通过SQL语句将查询的结果转化为对应的类-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TestMapper"> <!--namespace 区分不同mapper-->
+    <select id="selectStudent" resultType="Student"> <!--id: 名称  resultType:返回值类型，将返回的数据映射到哪一个类-->
+        <!--SQL语句-->
+        select * from student
+    </select>
+    <!--id 是要使用的关键词，resultType 对应要映射的类-->
+</mapper>
+```
+
+**2.mybatis:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="mysql的url"/>
+                <property name="username" value="用户"/>
+                <property name="password" value="密码"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers><!--加载mapper配置，才能正常使用SQL语句-->
+        <mapper url="file:TestMapper.xml"/> <!--相对路径-->
+    </mappers>
+</configuration>
+```
+
+**要在Mybatis中写入加载mapper的语句(其他配置不变)：**
+
+
+
+<mappers>
+        <mapper url="file:TestMapper.xml"/>
+    </mappers>
+
+**3.实体类：**
+
+```java
+import lombok.*;
+@Data
+@Setter
+@Getter
+public class Student {
+    int stu_id;
+    String name;
+    String sex;
+
+}
+```
+
+**4.main：**
+
+```java
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.List;
+
+public class Main {
+        public static void main(String[]args) throws FileNotFoundException {
+            SqlSessionFactory sqlSessionFactory=new SqlSessionFactoryBuilder().build(new FileInputStream("mybatis-config.xml"));//这里写M配置好的mybatis的文件名（要放在同一根目录下）
+            try(SqlSession session= sqlSessionFactory.openSession(true)){ //开启自动提交 (用try结束之后就不用再手动关闭(自动调用close方法))
+                List<Student> list = session.selectList("selectStudent");//通过list储存读取的数据
+                list.forEach(System.out::println);
+            }
+        }
+    }
+```
+
+这样就可以通过SQL语句将查询的结果映射的对应的实体类上，并打印出来
+
+倘若要加选择条件：
+
+在mapper中的select语句后加上where 
+
+```xml
+select * from student where stu_id = #{stu_id}
+```
+
+只查询学号
+
+对应的main里的语句要改为
+
+```java
+ System.out.println((Student)session.selectOne("selectStudent", 3));//数据要转化为学生类才可以打印出来
+```
+
+只查询学号为3 的学生
+
+#### 配置mybatis类
+
+通过配置一个Mybatis工具的类，我们就不用每次都去通过调用builder去创建一个SqlSession工厂。
+
+```java
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+public class Mybatis_tool {
+    private  static  SqlSessionFactory sqlSessionFactory;
+    static {
+        try {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(new FileInputStream("mybatis-config.xml"));
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+    }
+    //通过封装一个方法实现判断是否自动提交
+    static SqlSession getSession(boolean b){ //是否自动提交
+        return sqlSessionFactory.openSession(b); //openSession 是factory里判断是否自动提交的方法
+    }
+}
+
+```
+
+main:
+
+```java
+import org.apache.ibatis.session.SqlSession;
+
+import java.io.FileNotFoundException;
+
+public class Main {
+        public static void main(String[]args) throws FileNotFoundException {
+            try(SqlSession session=Mybatis_tool.getSession(true)){
+                System.out.println((Student)session.selectOne("selectStudent",1));
+            }
+        }
+    }
+```
+
+
+
+还可以将mapper与接口绑定，通过接口可以直接明确返回值的类型（是哪一个实体类）
+
+创建一个名为TestMapper的接口：
+
+```java
+package mapper;
+import java.util.List;
+//还要导入对应实体类的包（Student）
+public interface TestMapper {
+    List<Student> selectStudent();
+}
+
+```
+
+mapper只需要将namespace改为对应的接口路径
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper"><!--改为要绑定的接口的路径-->
+    <select id="selectStudent" resultType="Class.main.Student">
+        select * from student
+    </select>
+</mapper>
+```
+
+main：
+
+```java
+package Class.main;
+
+import mapper.TestMapper;
+import org.apache.ibatis.session.SqlSession;
+
+public class Main {
+        public static void main(String[]args) {
+            try(SqlSession session= Mybatis_tool.getSession(true)){
+               TestMapper mapper= session.getMapper(TestMapper.class);
+               mapper.selectStudent().forEach(System.out::println);
+            }
+        }
+}
+```
+
+tips：mapper可以直接映射到一个Map上，（如果属性太多），只需要将mapper.xml里的resultType改为Map，再在和mapper绑定的接口上定义对应的Map容器（List<Map> selectStudent()；）
+
+
+
+当出现实体类的定义的属性名字和数据库的属性名字对应不上，可以在mapper里将resultType替换为resultMap ，在resultMap里可以定应实体类的属性名和数据库的属性名的映射
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper">
+    <resultMap id="test" type="student">
+        <result column="stu_id" property="学号"/> <!--column对应数据库的列 property对应实体类的属性名-->
+        <result column="name" property="姓名"/>
+        <result column="sex" property="性别"/>
+    </resultMap>
+    <select id="selectStudent" resultMap="test">
+        select * from student
+    </select>
+</mapper>
+```
+
+
+
+
+
+倘若实体类里有了多个构造方法，~~虽然一般只有一个~~，如果直接执行程序会报错，因为在数据库的数据库的属性无法对应到实体类里的属性。
+
+一个构造方法：
+
+```java
+public class Student {
+
+   public Student (Integer stu_id ,String name ,String sex){
+      System.out.print("stu_id："+ stu_id +"  ");
+      System.out.print("name:" + name+"   ");
+      System.out.println("sex:" + sex);
+   }
+   int stu_id;
+   String name;
+   String sex;
+
+}
+```
+
+正常执行
+
+```java
+public class Student {
+   public Student (Integer stu_id){
+      System.out.println(stu_id);
+   }
+   public Student (Integer stu_id ,String name ){
+      System.out.print("stu_id："+ stu_id +"  ");
+      System.out.print("name:" + name+"   ");
+      System.out.println("sex:" + sex);
+   }
+   int stu_id;
+   String name;
+   String sex;
+
+```
+
+报错，这种情况需要我们去mapper里设置一个构造器
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper">
+    <resultMap id="test" type="student">
+        <constructor>
+            <arg column="stu_id" javaType="Integer"/>
+            <arg column="name" javaType="String"/>
+        </constructor>
+    </resultMap>
+    <select id="selectStudent" resultMap="test">
+        select * from student
+    </select>s
+</mapper>
+```
+
+将无法正常映射的数据里的属性，映射到在实体类里对应的数据类型，（注意：非对象的数据类型不行（列如：int））
 
