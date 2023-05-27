@@ -639,8 +639,6 @@ DOM树：
 
 ![image-20230509172532390](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230509172532390.png)
 
-~~前端不想学了直接干maven~~
-
 ## 后端开发
 
 ### Socket技术：
@@ -1691,5 +1689,560 @@ public class Student {
 </mapper>
 ```
 
-将无法正常映射的数据里的属性，映射到在实体类里对应的数据类型，（注意：非对象的数据类型不行（列如：int））
+将无法正常映射的数据里的属性，映射到在实体类里对应的数据类型，（注意：非对象的数据类型不行（列如：int）
+
+
+
+#### 增删改查
+
+只需要配置对应的mapper和与mapper绑定的接口的方法
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper">
+    <select id="selectStudent" resultType="student">
+        select * from student
+    </select>
+    <select id="getStudentByStu_id" resultType="student">
+        select * from student where stu_id =#{stu_id} <!--通过#{} 来读取传入的数据-->
+    </select>
+</mapper>
+```
+
+接口：
+
+```java
+package mapper;
+import Class.main.Student;
+import java.util.List;
+import java.util.Map;
+
+public interface TestMapper {
+    List<Student> selectStudent();
+    Student getStudentByStu_id(int stu_id);
+}
+```
+
+**插入：**
+
+**mapper:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper">
+    <select id="selectStudent" resultType="student">
+        select * from student
+    </select>
+    <select id="getStudentByStu_id" resultType="student">
+        select * from student where stu_id =#{stu_id} <!--通过#{} 来读取传入的数据-->
+    </select>
+    <insert id="addStudent" parameterType="student">
+        insert into student(stu_id,name,sex) values(#{stu_id},#{name},#{sex})
+    </insert>
+</mapper>
+```
+
+**接口：**
+
+```java
+package mapper;
+import Class.main.Student;
+import java.util.List;
+import java.util.Map;
+
+public interface TestMapper {
+    List<Student> selectStudent();
+    Student getStudentByStu_id(int stu_id);
+    int addStudent(Student s);
+}
+
+```
+
+**实体类：**
+
+```java
+package Class.main;
+
+import lombok.*;
+import lombok.experimental.Accessors;
+import org.apache.ibatis.type.Alias;
+
+@Data
+@Accessors(chain = true)
+public class Student {
+   int stu_id;
+   String name;
+   String sex;
+
+}
+```
+
+**main:**
+
+```java
+package Class.main;
+
+import mapper.TestMapper;
+import org.apache.ibatis.session.SqlSession;
+
+public class Main {        public static void main(String[]args) {
+            try(SqlSession session= Mybatis_tool.getSession(true)){
+               TestMapper mapper= session.getMapper(TestMapper.class);
+                System.out.println(mapper.addStudent(new Student().setStu_id(9).setName("test").setSex("男")));
+            }
+        }
+}
+```
+
+**删除：**
+
+**mapper:**
+
+```xml
+ <delete id="deleteStudent" parameterType="student">
+        delete from student where stu_id=#{stu_id}
+    </delete>
+```
+
+**接口:**
+
+```java
+    int deleteStudent(int stu_id);
+```
+
+**修改：**
+
+```xml
+   <update id="updateStudent" parameterType="student">
+        update student set sex='女',name='test' where stu_id=#{stu_id}
+    </update>
+```
+
+接口：
+
+```java
+ int updateStudent(int stu_id);
+```
+
+#### 复杂查询
+
+当我们要查询老师的数据时，还要将老师所教授的学生的信息一并查询出来，那该怎么做？
+
+老师的实体类
+
+```java
+package Class.main;
+import  java.util.List;
+import lombok.Data;
+
+@Data
+public class Teacher {
+    int tea_id;
+    String name;
+    List<Student> studentList;
+}
+
+```
+
+我们需要将学生的信息一并映射为一个List表，这样做就是一对多的查询，需要我们自己去定义映射规则。
+
+**一对多：（一个教师教授多个学生）**
+
+xml:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper">
+    <select id="selectStudent" resultType="student">
+        select * from student
+    </select>
+    <select id="getStudentByStu_id" resultType="student">
+        select * from student where stu_id =#{stu_id} <!--通过#{} 来读取传入的数据-->
+    </select>
+    <insert id="addStudent" parameterType="student">
+        insert into student(stu_id,name,sex) values(#{stu_id},#{name},#{sex})
+    </insert>
+    <delete id="deleteStudent" parameterType="student">
+        delete from student where stu_id=#{stu_id}
+    </delete>
+    <update id="updateStudent" parameterType="student">
+        update student set sex='女',name='test' where stu_id=#{stu_id}
+    </update>
+    <resultMap id="asTeacher" type="teacher">
+        <id column="tea_id" property="tea_id"/> <!--id标签用于判断是否为同一对象的数据，如果不用会识别成多个教师数据（id可以当做key）-->
+        <result column="tname" property="name"/>
+        <collection property="studentList" ofType="student"> <!--collection:将以下的数据全部归为一个集合，全部存放在List里--><!--property（属性）；连接的对象，ofType:对象的类型-->
+            <id property="stu_id" column="stu_id"/>
+            <result column="name" property="name"/>
+            <result column="sex" property="sex"/>
+        </collection>
+    </resultMap>
+    <select id="getTeacherByTea_id" resultMap="asTeacher"> <!--注意老师的名字要起别名，不然分不清那个是老师的name，那个是学生的name-->
+        select * ,teacher.name as tname from student inner join teach on student.stu_id=teach.stu_id
+        inner join teacher on teach.tea_id = teacher.tea_id where teach.tea_id=#{tea_id}
+    </select>
+</mapper>
+```
+
+接口：
+
+```java
+    Teacher getTeacherByTea_id(int tea_id);
+```
+
+main：
+
+```java
+  try(SqlSession session= Mybatis_tool.getSession(true)){
+               TestMapper mapper= session.getMapper(TestMapper.class);
+                System.out.println(mapper.getTeacherByTea_id(1));
+            }
+```
+
+**多对一：（多个学生对应一个老师）**
+
+(通过老师编号来选择学生)
+
+xml：
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper">
+    <resultMap id="test" type="Student">
+        <id column="stu_id" property="stu_id"/>
+        <result column="name" property="name"/>
+        <result column="sex" property="sex"/>
+        <association property="teacher" javaType="Teacher"><!--关联，将这个数据库里对应的属性映射到java里的对应的实体类-->
+            <id column="tea_id" property="tea_id"/>
+            <result column="tname" property="name"/>
+        </association>
+    </resultMap>
+    <select id="selectStudent" resultMap="test">
+        select *,teacher.name as tname from student left join teach on student.stu_id=teach.stu_id
+        left join teacher on teacher.tea_id=teach.tea_id where teacher.tea_id=#{tea_id}
+    </select>
+</mapper>
+```
+
+接口：
+
+```java
+package mapper;
+import Class.main.Student;
+import java.util.List;
+import java.util.Map;
+import Class.main.Teacher;
+public interface TestMapper {
+    List<Student> selectStudent(int tea_id);
+}
+
+```
+
+main：
+
+```java
+package Class.main;
+
+import mapper.TestMapper;
+import org.apache.ibatis.session.SqlSession;
+
+public class Main {public static void main(String[]args) {
+            try(SqlSession session= Mybatis_tool.getSession(true)){
+               TestMapper mapper= session.getMapper(TestMapper.class);
+                mapper.selectStudent(1).forEach(System.out::println);
+            }
+    }
+}
+```
+
+#### 事务操作：
+
+和JDBC的事务一样
+
+```java
+package Class.main;
+
+import mapper.TestMapper;
+import org.apache.ibatis.session.SqlSession;
+
+public class Main {public static void main(String[]args) {
+            try(SqlSession session= Mybatis_tool.getSession(false)){
+               TestMapper mapper= session.getMapper(TestMapper.class);
+                System.out.println(mapper.addStudent(new Student().setStu_id(9).setName("1").setSex("女")));
+                session.rollback();
+                session.commit();
+            }
+    }
+}
+```
+
+将自动提交改为false，在手动commit之前，执行了一次rollback，相当于插入操作没有执行过。（概念和操作都和JDBC一样）
+
+#### 动态SQL
+
+![image-20230522210340679](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230522210340679.png)
+
+## 缓存机制
+
+缓存机制：默认一级缓存开启，当开启一个session后，每一条查询（select）的结果都会被保存起来（缓存），下一次在查询相同信息时（前提是该session没有结束）会直接在缓存里查询，只有当查询到缓存区没有的数据时才会再去向数据库请求数据。
+
+**一级缓存无法被关闭**
+
+一级缓存是在各自的session里，并不相通，只有在自己的session里才能查询到自己的一级缓存的数据
+
+二级缓存是不管哪个session只要开启了二级缓存，二级缓存里的数据在不同的session里都是可以查询到的
+
+添加了二级缓存后，会先从二级缓存里查询数据，当二级缓存里没有时，才会从一级缓存中查询，当一级缓存里没有数据时，才会向数据库请求数据。
+
+每一次对数据库的数据进行修改时，缓存区都会被清空（保证查询到的数据时最新的数据）
+
+而且只有当session结束后才会将自己的一级缓存的数据写入到二级缓存里
+
+**![image-20230526191819994](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526191819994.png)**
+
+这是一个session
+
+![image-20230526192355984](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526192355984.png)
+
+这是两个不同的session
+
+![image-20230526192416342](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526192416342.png)
+
+
+
+只开启一种select的二级缓存（通过usCache，flushCache：清空缓存）
+
+![image-20230526193529478](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526193529478.png)
+
+开启所有的二级缓存：
+
+在Mybatis配置里通过setting开启
+
+![image-20230526193738040](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526193738040.png)
+
+现在有一个问题，如果在idea里开启了一个session，里面执行一个语句，可以每3秒钟查询同一个学生的信息，通过一级缓存的机制可以知道，只有第一次是向数据库里查询信息，之后的每一次都是向一级缓存查询信息，之后所得到的信息都是 一样的
+
+```java
+package Class.main;
+
+import mapper.TestMapper;
+import org.apache.ibatis.session.SqlSession;
+
+public class Main {
+    public static void main(String[]args) {
+        try(SqlSession session=Mybatis_tool.getSession(true)){
+            TestMapper mapper=session.getMapper(TestMapper.class);
+            while(true){
+                try{
+                    Thread.sleep(3000);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+                System.out.println(mapper.getStudentByStu_id(6));
+            }
+        }
+    }
+}
+```
+
+
+
+![image-20230526194621215](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526194621215.png)
+
+但是如果此时，我在其他地方（不是在该程序的session里执行的语句）对查询学生的数据进行修改，那么此时程序检测不到我已经对数据库进行了修改，还是从一级缓存里读取数据，那么就造成了数据的偏差。
+
+例如：在上面的程序运行的时候，
+
+![image-20230526195036660](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526195036660.png)
+
+我对数据库进行修改：
+
+![image-20230526195106928](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526195106928.png)
+
+将查询学生的性别改成了女
+
+但是程序查询的结果依然是男：
+
+![image-20230526195145129](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526195145129.png)
+
+这样就造成了数据的偏差。（同理二级缓存也会出现这个问题）
+
+那么该如何解决这个问题？
+
+如果我们不使用缓存，那么是不是永远都不会出现这种情况（~~从源头解决问题：），怎么可能不用缓存捏~~），但是一级缓存又是关闭不了的（此路不通？）
+
+那么就该使用flushCache了！直接清空缓存，就相当于没有使用缓存！
+
+![image-20230526195643869](C:\Users\kilok\AppData\Roaming\Typora\typora-user-images\image-20230526195643869.png)
+
+每次都从数据库请求信息，数据就不会出现偏差！（~~那缓存机制造出来是干什么的？~~）
+
+如果想要使用缓存机制又不出现这种问题，那么还有一种方法，那就是让所有的（本地可以修改数据库的）平台都使用同一个缓存，那么任何一个地方修改就清空缓存区，从数据库请求数据，这样就不会出现数据偏差的问题。
+
+那么该怎么做呢？。。。。。。。。。。。。。
+
+继续学吧0_0
+
+
+
+## 使用注解开发
+
+之前的学习通过mapper映射器可以很大程度的简化了我们的对数据库查询的操作，但是总不能都写一个mapper再写一个接口来和mapper绑定（还是有一点麻烦），那么有没有更好的方法呢？（肯定是有的，~~所以前面白雪了？~~），那就是使用注解开发，不用在去写xml（mapper映射器）（其实有一些大项目还是得用xml :( ）。
+
+优点是更加直观、
+
+直接将之前配置的mapper和绑定的接口删除
+
+新建一个TestMapper
+
+```java
+package mapper;
+
+import Class.main.Student;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
+
+public interface TestMapper {
+    @Select("select * from student where stu_id=#{stu_id}")
+    Student getStudent(int stu_id);
+
+    @Insert("insert into student(stu_id,name,sex) values(#{stu_id},#{name},#{sex})")
+    int addStudent(Student student);
+}
+
+```
+
+main:
+
+```java
+package Class.main;
+
+import mapper.TestMapper;
+import org.apache.ibatis.session.SqlSession;
+
+public class Main {
+    public static void main(String[]args) {
+        try(SqlSession session=Mybatis_tool.getSession(true)){
+            TestMapper mapper= session.getMapper(TestMapper.class);
+            System.out.println(mapper.getStudent(1));
+            mapper.addStudent(new Student().setStu_id(11).setName("11").setSex("男"));
+        }
+    }
+}
+```
+
+通过接口对于简单的增删改查大大提高了方便性
+
+使用注解进行复杂查询：
+
+一对多：
+
+
+
+teacher:
+
+```java
+@Data
+public class Teacher {
+    int tea_id;
+    String name;
+    List<Student> studentList;
+}
+```
+
+
+
+接口：
+
+```java
+    @Results({//和xml里的ResultMap同样，自定义映射规则
+            @Result(column = "tea_id",property = "tea_id",id = true),//id：主键
+            @Result(column = "name",property = "name"),
+            @Result(column = "tea_id",property = "studentList",many = //many和xml里的collection一样将以下的数据归为一个集合
+                @Many(select = "getStudentByTea_id")
+            )
+    })
+    @Select("select * from teacher where tea_id=#{tea_id}")//主查询
+    Teacher getTeacherByTea_id(int tea_id);
+
+    @Select("select * from student inner join teach on teach.stu_id=student.stu_id where tea_id=#{tea_id}")//子查询
+    Student getStudentByTea_id(int tea_id);
+```
+
+main:
+
+```java
+public class Main {
+    public static void main(String[]args) {
+        try(SqlSession session=Mybatis_tool.getSession(true)){
+            TestMapper mapper= session.getMapper(TestMapper.class);
+            System.out.println(mapper.getTeacherByTea_id(1));
+        }
+    }
+}
+```
+
+多对一：
+
+student:
+
+```java
+@Data
+@Accessors(chain = true)
+public class Student {
+   int stu_id;
+   String name;
+   String sex;
+   List<Teacher> teacherList;
+
+}
+```
+
+
+
+接口：
+
+```java
+    @Results({
+            @Result(column = "stu_id",property = "stu_id",id = true),
+            @Result(column = "name",property = "name"),
+            @Result(column = "sex",property = "sex"),
+            @Result(column = "stu_id",property = "teacherList",one =
+                    @One(select = "getTeacherByStu_id")
+            )
+    })//one 就是一对多
+    @Select("select * from student where stu_id=#{stu_id}")
+    Student getStudentByStu_id(int stu_id);
+    @Select("select * from teacher inner join teach on teach.tea_id=teacher.tea_id where stu_id=#{stu_id}")
+    Teacher getTeacherByStu_id(int stu_id);
+```
+
+main：
+
+```java
+public class Main {
+    public static void main(String[]args) {
+        try(SqlSession session=Mybatis_tool.getSession(true)){
+            TestMapper mapper= session.getMapper(TestMapper.class);
+            System.out.println(mapper.getStudentByStu_id(1));
+        }
+    }
+}
+```
+
+## Mybatis的动态代理机制
 
