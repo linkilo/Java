@@ -2101,3 +2101,148 @@ public class Main {
 
 之前的学习通过mapper映射器可以很大程度的简化了我们的对数据库查询的操作，但是总不能都写一个mapper再写一个接口来和mapper绑定（还是有一点麻烦），那么有没有更好的方法呢？（肯定是有的，~~所以前面白雪了？~~），那就是使用注解开发，不用在去写xml（mapper映射器）（其实有一些大项目还是得用xml :( ）。
 
+优点是更加直观、
+
+直接将之前配置的mapper和绑定的接口删除
+
+新建一个TestMapper
+
+```java
+package mapper;
+
+import Class.main.Student;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
+
+public interface TestMapper {
+    @Select("select * from student where stu_id=#{stu_id}")
+    Student getStudent(int stu_id);
+
+    @Insert("insert into student(stu_id,name,sex) values(#{stu_id},#{name},#{sex})")
+    int addStudent(Student student);
+}
+
+```
+
+main:
+
+```java
+package Class.main;
+
+import mapper.TestMapper;
+import org.apache.ibatis.session.SqlSession;
+
+public class Main {
+    public static void main(String[]args) {
+        try(SqlSession session=Mybatis_tool.getSession(true)){
+            TestMapper mapper= session.getMapper(TestMapper.class);
+            System.out.println(mapper.getStudent(1));
+            mapper.addStudent(new Student().setStu_id(11).setName("11").setSex("男"));
+        }
+    }
+}
+```
+
+通过接口对于简单的增删改查大大提高了方便性
+
+使用注解进行复杂查询：
+
+一对多：
+
+
+
+teacher:
+
+```java
+@Data
+public class Teacher {
+    int tea_id;
+    String name;
+    List<Student> studentList;
+}
+```
+
+
+
+接口：
+
+```java
+    @Results({//和xml里的ResultMap同样，自定义映射规则
+            @Result(column = "tea_id",property = "tea_id",id = true),//id：主键
+            @Result(column = "name",property = "name"),
+            @Result(column = "tea_id",property = "studentList",many = //many和xml里的collection一样将以下的数据归为一个集合
+                @Many(select = "getStudentByTea_id")
+            )
+    })
+    @Select("select * from teacher where tea_id=#{tea_id}")//主查询
+    Teacher getTeacherByTea_id(int tea_id);
+
+    @Select("select * from student inner join teach on teach.stu_id=student.stu_id where tea_id=#{tea_id}")//子查询
+    Student getStudentByTea_id(int tea_id);
+```
+
+main:
+
+```java
+public class Main {
+    public static void main(String[]args) {
+        try(SqlSession session=Mybatis_tool.getSession(true)){
+            TestMapper mapper= session.getMapper(TestMapper.class);
+            System.out.println(mapper.getTeacherByTea_id(1));
+        }
+    }
+}
+```
+
+多对一：
+
+student:
+
+```java
+@Data
+@Accessors(chain = true)
+public class Student {
+   int stu_id;
+   String name;
+   String sex;
+   List<Teacher> teacherList;
+
+}
+```
+
+
+
+接口：
+
+```java
+    @Results({
+            @Result(column = "stu_id",property = "stu_id",id = true),
+            @Result(column = "name",property = "name"),
+            @Result(column = "sex",property = "sex"),
+            @Result(column = "stu_id",property = "teacherList",one =
+                    @One(select = "getTeacherByStu_id")
+            )
+    })//one 就是一对多
+    @Select("select * from student where stu_id=#{stu_id}")
+    Student getStudentByStu_id(int stu_id);
+    @Select("select * from teacher inner join teach on teach.tea_id=teacher.tea_id where stu_id=#{stu_id}")
+    Teacher getTeacherByStu_id(int stu_id);
+```
+
+main：
+
+```java
+public class Main {
+    public static void main(String[]args) {
+        try(SqlSession session=Mybatis_tool.getSession(true)){
+            TestMapper mapper= session.getMapper(TestMapper.class);
+            System.out.println(mapper.getStudentByStu_id(1));
+        }
+    }
+}
+```
+
+## Mybatis的动态代理机制
+
