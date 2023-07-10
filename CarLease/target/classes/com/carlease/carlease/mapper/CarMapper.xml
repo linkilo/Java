@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?><!--mapper 映射器，通过映射器可以快速的通过SQL语句将查询的结果转化为对应的类-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carlease.carlease.mapper.CarMapper">
+    <update id="update">
+        update cars
+        <set>
+            <if test="name !=null and name!= ''">
+                name=#{name},
+            </if>
+            <if test="vehicleType!=null and vehicleType!=''">
+                Vehicle_type=#{vehicleType},
+            </if>
+            <if test="msg!=null and msg!=''">
+                msg=#{msg},
+            </if>
+            update_time=now()
+        </set>
+        where id=#{id}
+    </update>
+    <delete id="delete">
+        delete from
+        cars
+        where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="GetCars" resultType="com.carlease.carlease.pojo.Cars">
+        select *
+        from cars
+        <where>
+            <if test="name !=null">
+                name like concat('%',#{name},'%'),
+            </if>
+            <if test="vehicleType !=null">
+                Vehicle_type=#{vehicleType}
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/CarLease
+    username: root
+    password: 7561@lyl
+    #配置单个文件的限制，和一次性上传的所有文件的大小限制
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1000MB
+#阿里云OSS配置
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    accessKeyId: LTAI5tCdHuyPzEG5LDzqcmp2
+    accessKeySecret: fVMKzRagmMoqbPIg7GxFUWyB30Ink5
+    bucketName: kilo-webtest

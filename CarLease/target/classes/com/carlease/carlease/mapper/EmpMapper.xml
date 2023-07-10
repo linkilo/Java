@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?><!--mapper 映射器，通过映射器可以快速的通过SQL语句将查询的结果转化为对应的类-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carlease.carlease.mapper.EmpMapper">
+    <update id="update">
+        update emps
+        <set>
+            <if test="name!=null and name!=''">
+                name =#{name},
+            </if>
+            <if test="username !=null and username !=''">
+                username=#{username},
+            </if>
+            <if test="password!=null and password!=''">
+                password=#{password},
+            </if>
+            <if test="sex !=null">
+                sex=#{sex}
+            </if>
+            where id =#{id}
+        </set>
+    </update>
+    <delete id="delete">
+        delete from
+        emps
+        where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="getEmps" resultType="com.carlease.carlease.pojo.Emp">
+        select *
+        from emps
+        <where>
+            <if test="id !=null">
+                id =#{id},
+            </if>
+            <if test="name !=null">
+                name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+
+</mapper>
